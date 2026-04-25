@@ -71,21 +71,7 @@ repositories {
 
 
 def gitCommitHash = { ->
-    try {
-        ExecOutput result = providers.exec {
-            commandLine = ['git', 'rev-parse', '--short', 'HEAD']
-            ignoreExitValue = true
-        }
-
-        if (result.getResult().get().getExitValue() != 0) {
-            return "<UnknownCommit>";
-        } else {
-            return result.standardOutput.asText.get().strip();
-        }
-    } catch (Exception e) {
-        e.printStackTrace()
-        return "<UnknownCommit>";
-    }
+    return "" // Disabled for release
 }
 
 def buildtime = {System.currentTimeSeconds()}
@@ -224,6 +210,7 @@ tasks.register('compileJava21', JavaCompile) {
 }
 
 tasks.jar {
+    archiveFileName.set("voxy-0.2.14-alpha.jar")
     dependsOn(tasks.compileJava21)
 
     from(tasks.compileJava21.destinationDirectory) {
@@ -240,6 +227,10 @@ tasks.jar {
     from("LICENSE") {
         rename { "${it}_${project.archives_base_name}"}
     }
+}
+
+tasks.remapJar {
+    archiveFileName.set("voxy-0.2.14-Forge-1.20.1.jar")
 }
 
 publishing() {
