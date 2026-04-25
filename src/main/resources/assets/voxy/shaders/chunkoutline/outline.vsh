@@ -1,7 +1,5 @@
 #version 460
 
-#import <voxy:util/depthutils.glsl>
-
 layout(binding = 0, std140) uniform SceneUniform {
     mat4 MVP;
     ivec4 cameraBlockPos;
@@ -17,7 +15,7 @@ ivec3 unpackPos(ivec2 pos) {
 }
 
 bool shouldRender(ivec3 icorner) {
-    vec3 corner = vec3(mix(mix(ivec3(0), icorner-1, greaterThan(icorner-1, ivec3(0))), icorner+17, lessThan(icorner+17, ivec3(0))))-negInnerBlock.xyz;
+    vec3 corner = vec3(mix(mix(ivec3(0), icorner, greaterThan(icorner, ivec3(0))), icorner+16, lessThan(icorner+16, ivec3(0))))-negInnerBlock.xyz;
     bool visible = (corner.x*corner.x + corner.z*corner.z) < (negInnerBlock.w*negInnerBlock.w);
     visible = visible && abs(corner.y) < negInnerBlock.w;
     return visible;
@@ -43,16 +41,9 @@ void main() {
     //TODO: make it W.R.T world height and offsets
     //cubeCornerI.y = cubeCornerI.y*1024-512;
     gl_Position = MVP * vec4(vec3(cubeCornerI+origin), 1);
-
-    //TODO: FIXME with reverse z need tobe + not -
-    gl_Position.z += CLOSER_SIGN*0.0005f;//Bring closer to camera
+    gl_Position.z -= 0.0005f;
 
     #ifdef TAA
     gl_Position.xy += getTAA()*gl_Position.w;//Apply TAA if we have it
     #endif
 }
-
-
-
-//Undefine depth stuff
-#import <voxy:util/depthutils.glsl>

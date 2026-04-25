@@ -12,8 +12,6 @@
 // substantually for performance (for both persistent threads and incremental)
 
 
-#import <voxy:util/depthutils.glsl>
-
 layout(binding = HIZ_BINDING) uniform sampler2D hizDepthSampler;
 
 //TODO: maybe do spher bounds aswell? cause they have different accuracies but are both over estimates (liberals (non conservative xD))
@@ -95,14 +93,14 @@ void setupScreenspace(in UnpackedNode node) {
 
 
     //Perspective divide + convert to screenspace (i.e. range 0->1 if within viewport)
-    vec3 p000 = NDC2SCREEN(P000.xyz/P000.w);
-    vec3 p100 = NDC2SCREEN(P100.xyz/P100.w);
-    vec3 p001 = NDC2SCREEN(P001.xyz/P001.w);
-    vec3 p101 = NDC2SCREEN(P101.xyz/P101.w);
-    vec3 p010 = NDC2SCREEN(P010.xyz/P010.w);
-    vec3 p110 = NDC2SCREEN(P110.xyz/P110.w);
-    vec3 p011 = NDC2SCREEN(P011.xyz/P011.w);
-    vec3 p111 = NDC2SCREEN(P111.xyz/P111.w);
+    vec3 p000 = (P000.xyz/P000.w) * 0.5f + 0.5f;
+    vec3 p100 = (P100.xyz/P100.w) * 0.5f + 0.5f;
+    vec3 p001 = (P001.xyz/P001.w) * 0.5f + 0.5f;
+    vec3 p101 = (P101.xyz/P101.w) * 0.5f + 0.5f;
+    vec3 p010 = (P010.xyz/P010.w) * 0.5f + 0.5f;
+    vec3 p110 = (P110.xyz/P110.w) * 0.5f + 0.5f;
+    vec3 p011 = (P011.xyz/P011.w) * 0.5f + 0.5f;
+    vec3 p111 = (P111.xyz/P111.w) * 0.5f + 0.5f;
 
 
     {//Compute exact screenspace size
@@ -169,24 +167,18 @@ bool isCulledByHiz() {
     ivec2 mxbb = min(ivec2(ceil(_maxBB.xy*ssize)),ssize-1);
     ivec2 mnbb = ivec2(floor(_minBB.xy*ssize));
 
-    float pointSample = (NEAR*3.0f)-1.0f;
+    float pointSample = -1.0f;
     //float pointSample2 = 0.0f;
     for (int x = mnbb.x; x<=mxbb.x; x++) {
         for (int y = mnbb.y; y<=mxbb.y; y++) {
             float sp = texelFetch(hizDepthSampler, ivec2(x, y), ml).r;
             //pointSample2 = max(sp, pointSample2);
             //sp = mix(sp, pointSample, 0.9999999f<=sp);
-            pointSample = REDUCTION(sp, pointSample);
+            pointSample = max(sp, pointSample);
         }
     }
     //pointSample = mix(pointSample, pointSample2, pointSample<=0.000001f);
-    float depthTestAgainst;
-    #ifdef USE_REVERSE_Z
-    depthTestAgainst = _maxBB.z;
-    #else
-    depthTestAgainst = _minBB.z;
-    #endif
-    return DEPTH_SCALAR_COMPARE_EQUAL(pointSample,depthTestAgainst);
+    return pointSample<_minBB.z-0.000001f;;////(minBB.z*2-1);
 }
 
 

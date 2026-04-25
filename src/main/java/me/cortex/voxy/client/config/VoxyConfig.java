@@ -3,10 +3,12 @@ package me.cortex.voxy.client.config;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import me.cortex.voxy.client.core.SSAO;
 import me.cortex.voxy.common.Logger;
 import me.cortex.voxy.common.util.cpu.CpuLayout;
 import me.cortex.voxy.commonImpl.VoxyCommon;
+import net.caffeinemc.mods.sodium.client.gui.options.storage.OptionStorage;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.FileReader;
@@ -16,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
-public class VoxyConfig {
+public class VoxyConfig implements OptionStorage<VoxyConfig> {
     private static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .setPrettyPrinting()
@@ -31,8 +33,10 @@ public class VoxyConfig {
     public float sectionRenderDistance = 16;
     public int serviceThreads = (int) Math.max(CpuLayout.getCoreCount()/1.5, 1);
     public float subDivisionSize = 64;
-    public boolean useEnvironmentalFog = true;
+    public boolean renderVanillaFog = true;
+    public int skyFogDistance = 96;
     public boolean dontUseSodiumBuilderThreads = false;
+
     public String ssaoMode;
 
     public SSAO.SSAOMode getSSAOMode() {
@@ -45,7 +49,6 @@ public class VoxyConfig {
     public void setSSAOMode(SSAO.SSAOMode mode) {
         this.ssaoMode = mode.name().toLowerCase(Locale.ROOT);
     }
-
 
     private static VoxyConfig loadOrCreate() {
         if (VoxyCommon.isAvailable()) {
@@ -92,6 +95,11 @@ public class VoxyConfig {
         return FabricLoader.getInstance()
                 .getConfigDir()
                 .resolve("voxy-config.json");
+    }
+
+    @Override
+    public VoxyConfig getData() {
+        return this;
     }
 
     public boolean isRenderingEnabled() {

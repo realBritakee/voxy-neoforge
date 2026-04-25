@@ -6,17 +6,15 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import me.cortex.voxy.client.GPUSelectorWindows2;
 import me.cortex.voxy.common.util.ThreadUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.main.GameConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Minecraft.class)
-public class MixinGPUSelect {
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;save()V"))
-    private void voxy$injectInitWindow(GameConfig gc, CallbackInfo ci) {
+@Mixin(Window.class)
+public class MixinWindow {
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setBootErrorCallback()V"))
+    private void voxy$injectInitWindow(WindowEventHandler eventHandler, ScreenManager screenManager, DisplayData displayData, String fullscreenVideoModeString, String title, CallbackInfo ci) {
         //System.load("C:\\Program Files\\RenderDoc\\renderdoc.dll");
         var prop = System.getProperty("voxy.forceGpuSelectionIndex", "NO");
         if (!prop.equals("NO")) {

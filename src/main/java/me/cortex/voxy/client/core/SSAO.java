@@ -35,20 +35,20 @@ public class SSAO {
         BEST
     }
 
-    public static SSAO createSSAO(RenderProperties properties, SSAOMode mode) {
+    public static SSAO createSSAO(SSAOMode mode) {
         if (mode == SSAOMode.BASIC) {
-            return new SSAO(properties);
+            return new SSAO();
         } else if (mode == SSAOMode.BETTER) {
-            return new SSAO(properties, true, 12);
+            return new SSAO(true, 12);
         } else if (mode == SSAOMode.BEST) {
-            return new SSAO(properties, true, 24);
+            return new SSAO(true, 24);
         } else if (mode == SSAOMode.AUTO) {
             if ((!Capabilities.INSTANCE.canQueryGpuMemory) || Capabilities.INSTANCE.totalDedicatedMemory<2_500_000_000L) {
-                return createSSAO(properties, SSAOMode.BASIC);//Create a basic instance (cant query memory (probably intel igpu or less then 2.5gb vram)
+                return createSSAO(SSAOMode.BASIC);//Create a basic instance (cant query memory (probably intel igpu or less then 2.5gb vram)
             } else if (Capabilities.INSTANCE.totalDedicatedMemory<7_000_000_000L) {
-                return createSSAO(properties, SSAOMode.BETTER);//Less then 7gb of dedicated vram create a better instance (mid range dgpus (they can probably do best just fine but just in case)
+                return createSSAO(SSAOMode.BETTER);//Less then 7gb of dedicated vram create a better instance (mid range dgpus (they can probably do best just fine but just in case)
             } else {
-                return createSSAO(properties, SSAOMode.BEST);//create the best ssao
+                return createSSAO(SSAOMode.BEST);//create the best ssao
             }
         } else {
             throw new IllegalArgumentException();
@@ -60,13 +60,12 @@ public class SSAO {
     private final int spp;
 
     private final int depthSampler;
-    public SSAO(RenderProperties properties) {
-        this(properties, false, 0);
+    public SSAO() {
+        this(false, 0);
     }
 
-    public SSAO(RenderProperties properties, boolean betterSSAO, int samples) {
+    public SSAO(boolean betterSSAO, int samples) {
         var builder = Shader.make()
-                .apply(properties::apply)
                 .add(ShaderType.COMPUTE, "voxy:post/ssao.comp");
 
         this.spp = samples;

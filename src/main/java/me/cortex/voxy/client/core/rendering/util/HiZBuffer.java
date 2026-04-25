@@ -1,6 +1,5 @@
 package me.cortex.voxy.client.core.rendering.util;
 
-import me.cortex.voxy.client.core.RenderProperties;
 import me.cortex.voxy.client.core.gl.GlFramebuffer;
 import me.cortex.voxy.client.core.gl.GlTexture;
 import me.cortex.voxy.client.core.gl.GlVertexArray;
@@ -21,7 +20,11 @@ import static org.lwjgl.opengl.GL42C.glMemoryBarrier;
 import static org.lwjgl.opengl.GL45C.glTextureBarrier;
 
 public class HiZBuffer {
-    private final Shader hiz;
+    private final Shader hiz = Shader.make()
+            .add(ShaderType.VERTEX, "voxy:hiz/blit.vsh")
+            .add(ShaderType.FRAGMENT, "voxy:hiz/blit.fsh")
+            .compile()
+            .name("HiZ Builder");
     private final GlFramebuffer fb = new GlFramebuffer().name("HiZ");
     private final int sampler = glGenSamplers();
     private final int type;
@@ -29,21 +32,13 @@ public class HiZBuffer {
     private int levels;
     private int width;
     private int height;
-    private final RenderProperties properties;
 
-    public HiZBuffer(RenderProperties properties) {
-        this(properties, GL_DEPTH24_STENCIL8);
+    public HiZBuffer() {
+        this(GL_DEPTH24_STENCIL8);
     }
-    public HiZBuffer(RenderProperties properties, int type) {
+    public HiZBuffer(int type) {
         glNamedFramebufferDrawBuffer(this.fb.id, GL_NONE);
         this.type = type;
-        this.hiz = Shader.make()
-                .apply(properties::apply)
-                .add(ShaderType.VERTEX, "voxy:hiz/blit.vsh")
-                .add(ShaderType.FRAGMENT, "voxy:hiz/blit.fsh")
-                .compile()
-                .name("HiZ Builder");
-        this.properties = properties;
     }
 
     private void alloc(int width, int height) {
@@ -110,7 +105,7 @@ public class HiZBuffer {
         glTextureParameteri(this.texture.id, GL_TEXTURE_BASE_LEVEL, 0);
         glTextureParameteri(this.texture.id, GL_TEXTURE_MAX_LEVEL, 1000);//TODO: CHECK IF ITS -1 or -0
 
-        glDepthFunc(this.properties.closerEqualDepthCompare());
+        glDepthFunc(GL_LEQUAL);
         glDisable(GL_DEPTH_TEST);
         glBindFramebuffer(GL_FRAMEBUFFER, boundFB);
         glViewport(0, 0, width, height);

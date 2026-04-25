@@ -8,8 +8,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileLock;
@@ -65,8 +65,6 @@ public class VoxyClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        DebugEntries.init();
-
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             if (VoxyCommon.isAvailable()) {
                 dispatcher.register(VoxyCommands.register());

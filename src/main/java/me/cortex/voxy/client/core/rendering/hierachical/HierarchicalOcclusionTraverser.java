@@ -104,7 +104,6 @@ public class HierarchicalOcclusionTraverser {
             this.pipeline = pipeline;
         }
         this.traversal = Shader.makeAuto(PRINTF_processor)
-            .apply(pipeline.properties::apply)
             .defineIf("DEBUG", HIERARCHICAL_SHADER_DEBUG)
             .define("MAX_ITERATIONS", MAX_ITERATIONS)
             .define("LOCAL_SIZE_BITS", LOCAL_WORK_SIZE_BITS)

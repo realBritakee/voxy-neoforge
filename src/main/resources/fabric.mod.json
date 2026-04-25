@@ -38,13 +38,10 @@
     "common.voxy.mixins.json"
   ],
   "depends": {
-    "minecraft": ["~26.1"],
+    "minecraft": ["1.21.1"],
     "fabricloader": ">=0.14.22",
     "fabric-api": ">=0.91.1",
-    "sodium": ["=0.8.9"]
-  },
-  "breaks": {
-    "voxyworldgenv2": "=2.2.2"
+    "sodium": ">=0.6.13"
   },
   "accessWidener": "voxy.accesswidener"
 }

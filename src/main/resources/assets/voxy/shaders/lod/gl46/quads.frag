@@ -40,12 +40,22 @@ layout(location = 0) out vec4 outColour;
 #import <voxy:lod/gl46/bindings.glsl>
 #import <voxy:lod/lighting.glsl>
 
-
-#import <voxy:util/depthutils.glsl>
-
-
 vec4 uint2vec4RGBA(uint colour) {
     return vec4((uvec4(colour)>>uvec4(24,16,8,0))&uvec4(0xFF))/255.0;
+}
+
+uint unpackAlpha8(float alpha) {
+    return uint(round(clamp(alpha, 0.0, 1.0) * 255.0));
+}
+
+bool sampleTintMask(vec2 texturePos) {
+    return (unpackAlpha8(textureLod(blockModelAtlas, texturePos, 0).a) & 1u) != 0u;
+}
+
+vec4 clearTintMaskFromColour(vec4 colour) {
+    float alpha = float(unpackAlpha8(colour.a) & 0xFEu);
+    colour.a = alpha / 255.0;
+    return colour;
 }
 
 //bool useMipmaps() {
@@ -94,15 +104,13 @@ void voxy_emitFragment(VoxyFragmentParameters parameters);
 #else
 
 vec4 computeColour(vec2 texturePos, vec4 colour) {
-    //Conditional tinting, TODO: FIXME: this is better but still not great, try encode data into the top bit of alpha so its per pixel
+    // Partial tint faces carry an exact per-pixel tint marker in the low bit of
+    // the base-level alpha channel. That avoids guessing from grayscale colour.
 
     uint tintingFunction = tintingState();
     bool doTint = tintingFunction==2;//Always tint if function == 2
     if (tintingFunction == 1) {//partial tint
-        vec4 tintTest = textureLod(blockModelAtlas, texturePos, 0);
-        if (abs(tintTest.r-tintTest.g) < 0.02f && abs(tintTest.g-tintTest.b) < 0.02f) {
-            doTint = true;
-        }
+        doTint = sampleTintMask(texturePos);
     }
     if (doTint) {
         colour *= uint2vec4RGBA(interData.z).yzwx;
@@ -136,6 +144,7 @@ void main() {
         vec2 dx = dFdx(uvSmol);//vec2(lDx, dDx);
         vec2 dy = dFdy(uvSmol);//vec2(lDy, dDy);
         colour = textureGrad(blockModelAtlas, texPos, dx, dy);
+        colour = clearTintMaskFromColour(colour);
     }// else {
     //    colour = textureLod(blockModelAtlas, texPos, 0);
     //}
@@ -157,7 +166,7 @@ void main() {
     }
 
     //Check the minimum bounding texture and ensure we are greater than it
-    if (DEPTH_SCALAR_COMPARE(gl_FragCoord.z, texelFetch(depthTex, ivec2(gl_FragCoord.xy), 0).r)) {
+    if (gl_FragCoord.z < texelFetch(depthTex, ivec2(gl_FragCoord.xy), 0).r) {
         discard;
         return;
     }
@@ -204,10 +213,7 @@ void main() {
     uint tintingFunction = tintingState();
     bool doTint = tintingFunction==2;//Always tint if function == 2
     if (tintingFunction==1) {//Partial tint
-        vec4 tintTest = texture(blockModelAtlas, texPos, -2);
-        if (abs(tintTest.r-tintTest.g) < 0.02f && abs(tintTest.g-tintTest.b) < 0.02f) {
-            doTint = true;
-        }
+        doTint = sampleTintMask(texPos);
     }
     vec4 tint = vec4(1);
     if (doTint) {
@@ -246,7 +252,4 @@ colour = textureGrad(blockModelAtlas, texPos, dx, dy);
 //#else
 //colour = texture(blockModelAtlas, texPos);
 //#endif
-
-//Undefine the depth stuff
-#import <voxy:util/depthutils.glsl>
 

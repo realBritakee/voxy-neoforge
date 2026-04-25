@@ -5,8 +5,6 @@ layout(binding = 0, rgba8) uniform writeonly restrict image2D colourTexOut;
 layout(binding = 1) uniform sampler2D colourTex;
 layout(binding = 2) uniform sampler2D depthTex;
 
-#import <voxy:util/depthutils.glsl>
-
 #ifdef BETTER_SSAO
 layout(binding = 3) uniform sampler2D sourceDepthTex;
 layout(location = 4) uniform mat4 Proj;
@@ -19,7 +17,7 @@ layout(location = 4) uniform mat4 invMVP;
 #endif
 
 vec3 rev3d(mat4 matrix, vec3 clip) {
-    vec4 view = matrix * vec4(SCREEN2NDC(clip),1.0);
+    vec4 view = matrix * vec4(clip*2.0-1.0,1.0);
     return view.xyz/view.w;
 }
 
@@ -30,7 +28,7 @@ vec2 scale;
 vec4 reDeProject(vec3 pos) {
     vec4 view = MVP * vec4(pos, 1.0);
     view.xy /= view.w;
-    vec2 samplePos = view.xy*0.5+0.5;//Does not change reguardless of depth state
+    vec2 samplePos = view.xy*0.5+0.5;
     samplePos = clamp((vec2(ivec2(samplePos*size))+0.5)*scale, vec2(0.0f), vec2(1.0f));
     view.xy = samplePos;
 
@@ -44,7 +42,7 @@ vec4 reDeProject(vec3 pos) {
 
     float depth = texture(depthTex, view.xy).x;
 
-    if (depth == 1.0f || depth == 0.0f) {
+    if (depth >= 0.999999f || depth == 0.0f) {
         return vec4(-1.0f);
     }
 
@@ -54,7 +52,7 @@ vec4 reDeProject(vec3 pos) {
     }
 
     view.xy = view.xy*2.0f-1.0f;
-    view.z = SCREEN2NDC_DEPTH(depth);
+    view.z = depth*2.0-1.0;
     view.w = 1.0;
     view = invMVP * view;
     return vec4(view.xyz/view.w, 1.0f);
@@ -117,8 +115,8 @@ vec2 get_ssao_sample_offset(int step_index, vec2 dither) {
 
     return r * vec2(cos(theta), sin(theta));
 }
-#define SSAO_MAX_RADIUS_SCREEN 0.1
-#define SSAO_RADIUS 1.5f
+#define SSAO_MAX_RADIUS_SCREEN 0.05
+#define SSAO_RADIUS 1.0f
 
 
 vec2 r2(int n, vec2 seed) {
@@ -141,7 +139,7 @@ vec2 clamp_length(vec2 a, float min, float max) {
 }
 vec3 projProj(vec3 point) {
     vec4 aa = Proj*vec4(point,1);
-    return NDC2SCREEN(aa.xyz/aa.w);
+    return (aa.xyz/aa.w)*0.5+0.5;
 }
 
 #ifdef USE_GENERATED_SAMPLE_POINTS
@@ -190,13 +188,13 @@ float computeAO(vec3 uvDepth, vec3 worldNorm)
         float depth = texture(depthTex, sample_uv).x;
 
 
-        if (depth == FAR || depth == uvDepth.z) {//TODO FIXME: check depth == uvDepth.z isnt causing any other strange issues (might be better to compare the sample uv instead)
+        if (depth == 1.0f || depth == uvDepth.z) {//TODO FIXME: check depth == uvDepth.z isnt causing any other strange issues (might be better to compare the sample uv instead)
             continue;
         }
         vec3 offset_view;// = rev3d(invProj, vec3(sample_uv, depth));
-        if (depth == NEAR) {//Assume vanilla
+        if (depth == 0.0f) {//Assume vanilla
             depth = texture(sourceDepthTex, sample_uv).x;
-            if (depth == FAR) {
+            if (depth == 1.0f) {
                 continue;
             }
             offset_view = rev3d(sourceInvProj, vec3(sample_uv, depth));
@@ -253,7 +251,7 @@ void main() {
     vec2 point = vec2(vec2(gl_GlobalInvocationID.xy)+0.5f)*scale;//Offset to the center of the textile
     float depth = texture(depthTex, point).r;
     vec4 ocolour = vec4(0);
-    if (depth!=NEAR && depth!=FAR) {
+    if (depth!=0.0f && depth < 1.0f) {
         vec4 colour = texture(colourTex, point);
         if (colour == vec4(0.0f, 0.0f, 0.0f, 0.0f)) {
             ocolour = vec4(1.0f, 0.0f, 0.0f, 1.0f);

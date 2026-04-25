@@ -1,10 +1,7 @@
 package me.cortex.voxy.client.core;
 
-import com.mojang.blaze3d.opengl.GlConst;
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
-import com.mojang.blaze3d.platform.CompareOp;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlConst;
+import com.mojang.blaze3d.platform.GlStateManager;
 import me.cortex.voxy.client.TimingStatistics;
 import me.cortex.voxy.client.VoxyClient;
 import me.cortex.voxy.client.config.VoxyConfig;
@@ -35,7 +32,7 @@ import me.cortex.voxy.common.Logger;
 import me.cortex.voxy.common.thread.ServiceManager;
 import me.cortex.voxy.common.world.WorldEngine;
 import me.cortex.voxy.commonImpl.VoxyCommon;
-import net.caffeinemc.mods.sodium.client.util.FogParameters;
+import net.caffeinemc.mods.sodium.client.render.chunk.ChunkRenderMatrices;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
@@ -46,8 +43,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.GL_VIEWPORT;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glFinish;
 import static org.lwjgl.opengl.GL11.glGetIntegerv;
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL20C.glUseProgram;
+import static org.lwjgl.opengl.GL30.glGetIntegeri;
 import static org.lwjgl.opengl.GL30C.*;
 import static org.lwjgl.opengl.GL33.glBindSampler;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
@@ -71,7 +73,6 @@ public class VoxyRenderSystem {
     private final ViewportSelector<?> viewportSelector;
 
     private final AbstractRenderPipeline pipeline;
-    private final RenderProperties properties;
 
     private static AbstractSectionRenderer.Factory<?,? extends IGeometryData> getRenderBackendFactory() {
         //TODO: need todo a thing where selects optimal section render based on if supports the pipeline and geometry data type
@@ -105,8 +106,8 @@ public class VoxyRenderSystem {
 
             this.worldIn = world;
 
-            this.properties = RenderProperties.getRenderProperties();
             var backendFactory = getRenderBackendFactory();
+
             {
                 this.modelService = new ModelBakerySubsystem(world.getMapper());
                 this.renderGen = new RenderGenerationService(world, this.modelService, sm, IUsesMeshlets.class.isAssignableFrom(backendFactory.clz()));
@@ -125,7 +126,7 @@ public class VoxyRenderSystem {
                 this.nodeManager.start();
             }
 
-            this.pipeline = RenderPipelineFactory.createPipeline(this.properties, this.nodeManager, this.nodeCleaner, this.traversal, this::frexStillHasWork);
+            this.pipeline = RenderPipelineFactory.createPipeline(this.nodeManager, this.nodeCleaner, this.traversal, this::frexStillHasWork);
             this.pipeline.setupExtraModelBakeryData(this.modelService);//Configure the model service
 
             //Late stage traversal compile for shaders with taa
@@ -137,8 +138,8 @@ public class VoxyRenderSystem {
             this.viewportSelector = new ViewportSelector<>(sectionRenderer::createViewport);
 
             {
-                int minSec = Minecraft.getInstance().level.getMinSectionY() >> 5;
-                int maxSec = (Minecraft.getInstance().level.getMaxSectionY() - 1) >> 5;
+                int minSec = Minecraft.getInstance().level.getMinSection() >> 5;
+                int maxSec = (Minecraft.getInstance().level.getMaxSection() - 1) >> 5;
 
                 //Do some very cheeky stuff for MiB
                 if (VoxyCommon.IS_MINE_IN_ABYSS) {//TODO: make this somehow configurable
@@ -175,7 +176,7 @@ public class VoxyRenderSystem {
     }
 
 
-    public Viewport<?> setupViewport(Matrix4fc vanillaProjection, Matrix4fc modelView, FogParameters fogParameters, double cameraX, double cameraY, double cameraZ) {
+    public Viewport<?> setupViewport(ChunkRenderMatrices matrices, double cameraX, double cameraY, double cameraZ) {
         var viewport = this.getViewport();
         if (viewport == null) {
             return null;
@@ -189,7 +190,7 @@ public class VoxyRenderSystem {
         }
 
         //cameraY += 100;
-        var voxyProjection = computeProjectionMat(this.properties, vanillaProjection);
+        var voxyProjection = computeProjectionMat(matrices.projection());
 
         int[] dims = new int[4];
         glGetIntegerv(GL_VIEWPORT, dims);
@@ -204,18 +205,13 @@ public class VoxyRenderSystem {
                 height = (int) (height*factor[1]);
             }
         }
-        if (width == 0 || height == 0) {
-            Logger.error("Viewport width or height was zero, this is bad bad bad");
-            return null;
-        }
 
         viewport
-                .setVanillaProjection(vanillaProjection)
+                .setVanillaProjection(matrices.projection())
                 .setProjection(voxyProjection)
-                .setModelView(new Matrix4f(modelView))
+                .setModelView(new Matrix4f(matrices.modelView()))
                 .setCamera(cameraX, cameraY, cameraZ)
                 .setScreenSize(width, height)
-                .setFogParameters(fogParameters)
                 .update();
 
         if (VoxyClient.getOcclusionDebugState()==0) {
@@ -230,7 +226,6 @@ public class VoxyRenderSystem {
             return;
         }
         if (viewport.width <= 0 || viewport.height <= 0) {
-            Logger.error("Viewport width or height was zero, this is bad bad bad, exiting frame");
             return;//Only render on valid viewport
         }
 
@@ -269,7 +264,7 @@ public class VoxyRenderSystem {
         if ((!VoxyClient.disableSodiumChunkRender())&&!IrisUtil.irisShadowActive()) {
             this.chunkBoundRenderer.render(viewport);
         } else {
-            viewport.depthBoundingBuffer.clear(this.properties.inverseClearDepth());
+            viewport.depthBoundingBuffer.clear(0);
         }
         TimingStatistics.E.stop();
 
@@ -417,36 +412,18 @@ public class VoxyRenderSystem {
         ).mulLocal(makeProjectionMatrix(nearVoxy, 16*3000));
     }*/
 
-    private static Matrix4f computeProjectionMat(RenderProperties properties, Matrix4fc base) {
+    private static Matrix4f computeProjectionMat(Matrix4fc base) {
 
-        //this jank is to capture the extra crap they inject like viewbobbing
-        var rawMCProj = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.projectionMatrix;
-        var extraProjection = rawMCProj.invert(new Matrix4f()).mul(base);
+        var proj = new Matrix4f(base);
 
         float near = getRenderDistance()<=32.0f?8f:16f;
         near = VoxyClient.disableSodiumChunkRender()?0.1f:near;
 
         float far = 16*3000;
 
-        /* jank way of just modifying the base raw
-        if (true) {
-            return new Matrix4f(base)
-                    .m22((far + near) / (near - far))
-                    .m32((far+far) * near / (near - far));
-        }*/
-
-        //Flip near and far on reverse depth
-        if (properties.isReverseZ()) {
-            float tmp = near;
-            near = far;
-            far = tmp;
-        }
-
-        return extraProjection.mulLocal(
-                new Matrix4f(rawMCProj)
-                .m22((properties.isZero2One()?far:(far+near)) / (near - far))
-                .m32((properties.isZero2One()?far:(far+far)) * near / (near - far))
-        );
+        return proj
+                .m22((far + near) / (near - far))
+                .m32((far+far) * near / (near - far));
     }
 
     private boolean frexStillHasWork() {

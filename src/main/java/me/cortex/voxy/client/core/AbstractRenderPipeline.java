@@ -45,7 +45,6 @@ import static org.lwjgl.opengl.GL45.glGetNamedFramebufferAttachmentParameteri;
 import static org.lwjgl.opengl.GL45C.glBindTextureUnit;
 
 public abstract class AbstractRenderPipeline extends TrackedObject {
-    public final RenderProperties properties;
     private final BooleanSupplier frexStillHasWork;
 
     private final AsyncNodeManager nodeManager;
@@ -54,7 +53,7 @@ public abstract class AbstractRenderPipeline extends TrackedObject {
 
     protected AbstractSectionRenderer<?,?> sectionRenderer;
 
-    private final FullscreenBlit depthStencilSetup;
+    private final FullscreenBlit depthStencilSetup = new FullscreenBlit("voxy:post/fullscreen2.vert", "voxy:post/setup_stencil_depth.frag");
 
     public final DepthFramebuffer fb = new DepthFramebuffer(GL_DEPTH24_STENCIL8);
 
@@ -66,15 +65,12 @@ public abstract class AbstractRenderPipeline extends TrackedObject {
         glSamplerParameteri(DEPTH_SAMPLER, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     }
 
-    protected AbstractRenderPipeline(RenderProperties properties, AsyncNodeManager nodeManager, NodeCleaner nodeCleaner, HierarchicalOcclusionTraverser traversal, BooleanSupplier frexSupplier, boolean deferTranslucency) {
-        this.properties = properties;
+    protected AbstractRenderPipeline(AsyncNodeManager nodeManager, NodeCleaner nodeCleaner, HierarchicalOcclusionTraverser traversal, BooleanSupplier frexSupplier, boolean deferTranslucency) {
         this.frexStillHasWork = frexSupplier;
         this.nodeManager = nodeManager;
         this.nodeCleaner = nodeCleaner;
         this.traversal = traversal;
         this.deferTranslucency = deferTranslucency;
-
-        this.depthStencilSetup = new FullscreenBlit(properties, "voxy:post/fullscreen2.vert", "voxy:post/setup_stencil_depth.frag");
     }
 
     //Allows pipelines to configure model baking system
@@ -134,7 +130,7 @@ public abstract class AbstractRenderPipeline extends TrackedObject {
     }
 
     protected void initDepthStencil(int sourceFrameBuffer, int targetFb, int srcWidth, int srcHeight, int width, int height) {
-        glClearNamedFramebufferfi(targetFb, GL_DEPTH_STENCIL, 0, this.properties.clearDepth(), 1);
+        glClearNamedFramebufferfi(targetFb, GL_DEPTH_STENCIL, 0, 1.0f, 1);
         // using blit to copy depth from mismatched depth formats is not portable so instead a full screen pass is performed for a depth copy
         // the mismatched formats in this case is the d32 to d24s8
         glBindFramebuffer(GL30.GL_FRAMEBUFFER, targetFb);
@@ -159,7 +155,7 @@ public abstract class AbstractRenderPipeline extends TrackedObject {
         this.depthStencilSetup.blit();
 
 
-        glDepthFunc(this.properties.closerEqualDepthCompare());
+        glDepthFunc(GL_LEQUAL);
         glColorMask(true,true,true,true);
 
         //Make voxy terrain render only where there isnt mc terrain

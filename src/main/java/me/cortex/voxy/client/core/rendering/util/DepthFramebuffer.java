@@ -43,6 +43,10 @@ public class DepthFramebuffer {
         return this.depthType == GL_DEPTH24_STENCIL8?GL_DEPTH_STENCIL_ATTACHMENT: GL_DEPTH_ATTACHMENT;
     }
 
+    public void clear() {
+        this.clear(1.0f);
+    }
+
     public void clear(float depth) {
         try (var stack = MemoryStack.stackPush()) {
             nglClearNamedFramebufferfv(this.framebuffer.id, GL_DEPTH, 0, stack.nfloat(depth));

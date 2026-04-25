@@ -12,16 +12,13 @@ layout(location = 5) uniform vec4 fogColour;
 #endif
 #endif
 
-#import <voxy:util/depthutils.glsl>
-
 out vec4 colour;
 in vec2 UV;
 
 vec3 rev3d(vec3 clip) {
-    vec4 view = invProjMat * vec4(SCREEN2NDC(clip),1.0f);
+    vec4 view = invProjMat * vec4(clip*2.0f-1.0f,1.0f);
     return view.xyz/view.w;
 }
-
 float projDepth(vec3 pos) {
     vec4 view = projMat * vec4(pos, 1);
     return view.z/view.w;
@@ -35,12 +32,9 @@ void main() {
 
     vec3 point = rev3d(vec3(UV.xy, depth));
     depth = projDepth(point);
-    //TODO: HERE make an option/define to emit the output depth as something other then the input (i.e. if voxy is reverse z and vanilla isnt, transform and emit as not reverrse z)
-    depth = REDUCTION2(FAR+CLOSER_SIGN*(2.0f/((1<<24)-1)), depth);
-    depth = NDC2SCREEN_DEPTH(depth);
-
-    depth = gl_DepthRange.diff * depth + gl_DepthRange.near;//TODO: dont think this is right at all so should fix this
-
+    depth = min(1.0f-(2.0f/((1<<24)-1)), depth);
+    depth = depth * 0.5f + 0.5f;
+    depth = gl_DepthRange.diff * depth + gl_DepthRange.near;
     gl_FragDepth = depth;
 
     #ifdef EMIT_COLOUR

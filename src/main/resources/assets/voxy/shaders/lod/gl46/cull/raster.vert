@@ -8,7 +8,6 @@
 
 #import <voxy:lod/section.glsl>
 #import <voxy:lod/gl46/bindings.glsl>
-#import <voxy:util/depthutils.glsl>
 
 flat out uint id;
 flat out uint value;
@@ -39,9 +38,7 @@ void main() {
     offset += vec3(gl_VertexID&1, (gl_VertexID>>2)&1, (gl_VertexID>>1)&1)*(size+2*EXPANSION);
 
     gl_Position = MVP * vec4(vec3(pos)+offset*(1<<detail),1);
-
-    //Bring closer to camera
-    gl_Position.z += (CLOSER_SIGN*0.000001f) * gl_Position.w;
+    gl_Position.z -= 0.000001f * gl_Position.w;
 
     #ifdef TAA
     gl_Position.xy += getTAA()*gl_Position.w;//Apply TAA if we have it
@@ -55,7 +52,3 @@ void main() {
     bool wasVisibleLastFrame = previous==(frameId-1);
     value = (frameId&0x7fffffffu)|(uint(wasVisibleLastFrame)<<31);//Encode if it was visible last frame
 }
-
-
-//Undefine depth stuff
-#import <voxy:util/depthutils.glsl>

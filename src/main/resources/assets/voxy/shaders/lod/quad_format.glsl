@@ -1,4 +1,4 @@
-#ifdef QUAD_DATA_USE_64_BIT
+#ifdef GL_ARB_gpu_shader_int64
 #define Quad uint64_t
 
 #define Eu32(data, amountBits, shift) (uint((data)>>(shift))&((1u<<(amountBits))-1))

@@ -1,6 +1,5 @@
 package me.cortex.voxy.client.core.rendering.section.backend.mdic;
 
-import me.cortex.voxy.client.core.RenderProperties;
 import me.cortex.voxy.client.core.gl.GlBuffer;
 import me.cortex.voxy.client.core.rendering.Viewport;
 import me.cortex.voxy.client.core.rendering.hierachical.HierarchicalOcclusionTraverser;
@@ -12,8 +11,7 @@ public class MDICViewport extends Viewport<MDICViewport> {
     public final GlBuffer indirectLookupBuffer = new GlBuffer(HierarchicalOcclusionTraverser.MAX_QUEUE_SIZE*4+4);//In theory, this could be global/not unique to the viewport
     public final GlBuffer visibilityBuffer;
 
-    public MDICViewport(RenderProperties properties, int maxSectionCount) {
-        super(properties);
+    public MDICViewport(int maxSectionCount) {
         this.visibilityBuffer = new GlBuffer(maxSectionCount*4L);
     }
 

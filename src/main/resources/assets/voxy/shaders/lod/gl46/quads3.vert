@@ -1,11 +1,6 @@
 #version 460 core
 #extension GL_ARB_gpu_shader_int64 : enable
 
-#ifdef GL_ARB_gpu_shader_int64
-#define QUAD_DATA_USE_64_BIT
-#endif
-
-
 #ifdef USE_NV_JANK
 #extension GL_NV_gpu_shader5 : enable
 #endif
