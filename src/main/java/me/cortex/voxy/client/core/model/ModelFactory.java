@@ -9,6 +9,7 @@ import me.cortex.voxy.client.core.gl.GlBuffer;
 import me.cortex.voxy.client.core.gl.GlTexture;
 import me.cortex.voxy.client.core.model.bakery.SoftwareModelTextureBakery;
 import me.cortex.voxy.client.core.rendering.util.UploadStream;
+import me.cortex.voxy.client.core.util.StairBlockCooked;
 import me.cortex.voxy.common.Logger;
 import me.cortex.voxy.common.util.MemoryBuffer;
 import me.cortex.voxy.common.util.Pair;
@@ -179,11 +180,7 @@ public class ModelFactory {
         var blockState = this.mapper.getBlockStateFromBlockId(blockId);
 
         if (blockState.getBlock() instanceof StairBlock sb) {
-            if (sb.baseState.hasProperty(BlockStateProperties.WATERLOGGED)) {
-                blockState = sb.baseState.setValue(BlockStateProperties.WATERLOGGED, blockState.getValue(BlockStateProperties.WATERLOGGED));
-            } else {
-                blockState = sb.baseState;
-            }
+            blockState = ((StairBlockCooked)sb).setBaseWaterlogged(blockState);
         }
 
         //Before we enqueue the baking of this blockstate, we must check if it has a fluid state associated with it
@@ -266,11 +263,7 @@ public class ModelFactory {
         var biomeEntry = this.biomeQueue.poll();
         while (biomeEntry != null) {
             var biomeRegistry = Minecraft.getInstance().level.registryAccess().registryOrThrow(Registries.BIOME);
-            var mcbiomeEntry = biomeRegistry.getOptional(ResourceLocation.parse(biomeEntry.biome));
-            if (!mcbiomeEntry.isPresent()) {
-                Logger.error("Could not find biome: " + biomeEntry.biome + " using default");
-            }
-            var res = this.addBiome0(biomeEntry.id, mcbiomeEntry.orElse(DEFAULT_BIOME));
+            var res = this.addBiome0(biomeEntry.id, biomeRegistry.getOptional(ResourceLocation.tryParse(biomeEntry.biome)).orElseThrow());
             if (res != null) {
                 this.uploadResults.add(res);
             }

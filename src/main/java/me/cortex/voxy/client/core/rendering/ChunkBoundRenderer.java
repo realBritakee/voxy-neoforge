@@ -21,6 +21,15 @@ import org.lwjgl.system.MemoryUtil;
 import static org.lwjgl.opengl.ARBDirectStateAccess.glCopyNamedBufferSubData;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11C.GL_CCW;
+import static org.lwjgl.opengl.GL11C.GL_CULL_FACE;
+import static org.lwjgl.opengl.GL11C.GL_CW;
+import static org.lwjgl.opengl.GL11C.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11C.GL_GREATER;
+import static org.lwjgl.opengl.GL11C.GL_LEQUAL;
+import static org.lwjgl.opengl.GL11C.glDepthFunc;
+import static org.lwjgl.opengl.GL11C.glEnable;
+import static org.lwjgl.opengl.GL11C.glFrontFace;
 import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -86,7 +95,13 @@ public class ChunkBoundRenderer {
             }
         }
 
-        if (this.chunk2idx.isEmpty() && this.addQueue.isEmpty()) return;
+        if (!this.addQueue.isEmpty()) {
+            this.addQueue.forEach(this::_addPos);//TODO: REPLACE WITH SCATTER COMPUTE
+            this.addQueue.clear();
+            UploadStream.INSTANCE.commit();
+        }
+
+        if (this.chunk2idx.isEmpty()) return;
 
         viewport.depthBoundingBuffer.clear(0);
 
@@ -152,12 +167,6 @@ public class ChunkBoundRenderer {
             glEnable(GL_DEPTH_TEST);
         }
 
-
-        if (!this.addQueue.isEmpty()) {
-            this.addQueue.forEach(this::_addPos);//TODO: REPLACE WITH SCATTER COMPUTE
-            this.addQueue.clear();
-            UploadStream.INSTANCE.commit();
-        }
     }
 
     private void _remPos(long pos) {

@@ -2,13 +2,14 @@ package me.cortex.voxy.client;
 
 import me.cortex.voxy.client.core.gl.Capabilities;
 import me.cortex.voxy.client.core.rendering.util.SharedIndexBuffer;
+import me.cortex.voxy.client.core.util.ExpansionUtil;
+import me.cortex.voxy.client.config.VoxyConfig;
 import me.cortex.voxy.common.Logger;
 import me.cortex.voxy.commonImpl.VoxyCommon;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,7 +22,33 @@ import java.util.function.Function;
 public class VoxyClient implements ClientModInitializer {
     private static final HashSet<String> FREX = new HashSet<>();
     private static FileLock EXCLUSIVE_LOCK;
+    private static boolean INSTANCE_FACTORY_SET;
+    private static boolean RENDER_BACKEND_READY;
+    private static boolean RENDER_BACKEND_INITIALIZED;
+
+    private static VoxyClientInstance createInstance() {
+        if (!RENDER_BACKEND_READY) {
+            Logger.error("Voxy render backend is not initialized");
+            return null;
+        }
+        return new VoxyClientInstance();
+    }
+
+    private static void setInstanceFactory() {
+        if (!INSTANCE_FACTORY_SET) {
+            VoxyCommon.setInstanceFactory(VoxyClient::createInstance);
+            INSTANCE_FACTORY_SET = true;
+        }
+        VoxyConfig.reloadAfterVoxyAvailable();
+    }
+
     public static void initVoxyClient() {
+        if (RENDER_BACKEND_INITIALIZED) {
+            return;
+        }
+        RENDER_BACKEND_INITIALIZED = true;
+        setInstanceFactory();
+
         Capabilities.init();//Ensure clinit is called
 
         if (Capabilities.INSTANCE.hasBrokenDepthSampler) {
@@ -53,18 +80,23 @@ public class VoxyClient implements ClientModInitializer {
         if (systemSupported) {
 
             SharedIndexBuffer.INSTANCE.id();
-
-            VoxyCommon.setInstanceFactory(VoxyClientInstance::new);
+            RENDER_BACKEND_READY = true;
 
             if (!Capabilities.INSTANCE.subgroup) {
                 Logger.warn("GPU does not support subgroup operations, expect some performance degradation");
             }
 
         }
+
+        if (!ExpansionUtil.isJava21()) {
+            Logger.warn("Cannot use native Integer/Long compression. Using fallback...");
+        }
     }
 
     @Override
     public void onInitializeClient() {
+        setInstanceFactory();
+
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             if (VoxyCommon.isAvailable()) {
                 dispatcher.register(VoxyCommands.register());

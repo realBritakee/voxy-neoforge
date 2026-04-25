@@ -6,9 +6,8 @@ import com.google.gson.GsonBuilder;
 
 import me.cortex.voxy.client.core.SSAO;
 import me.cortex.voxy.common.Logger;
-import me.cortex.voxy.common.util.cpu.CpuLayout;
 import me.cortex.voxy.commonImpl.VoxyCommon;
-import net.caffeinemc.mods.sodium.client.gui.options.storage.OptionStorage;
+import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.FileReader;
@@ -25,16 +24,16 @@ public class VoxyConfig implements OptionStorage<VoxyConfig> {
             .excludeFieldsWithModifiers(Modifier.PRIVATE)
             .create();
 
+    private static boolean LOADED_WHILE_UNAVAILABLE;
     public static VoxyConfig CONFIG = loadOrCreate();
 
     public boolean enabled = true;
     public boolean enableRendering = true;
     public boolean ingestEnabled = true;
-    public float sectionRenderDistance = 16;
-    public int serviceThreads = (int) Math.max(CpuLayout.getCoreCount()/1.5, 1);
+    public int sectionRenderDistance = 16;
+    public int serviceThreads = (int) Math.max(Runtime.getRuntime().availableProcessors() * 2 / 1.5, 1);
     public float subDivisionSize = 64;
     public boolean renderVanillaFog = true;
-    public int skyFogDistance = 96;
     public boolean dontUseSodiumBuilderThreads = false;
 
     public String ssaoMode;
@@ -70,11 +69,18 @@ public class VoxyConfig implements OptionStorage<VoxyConfig> {
             var config = new VoxyConfig();
             config.save();
             return config;
-        } else {
-            var config = new VoxyConfig();
-            config.enabled = false;
-            config.enableRendering = false;
-            return config;
+        }
+        LOADED_WHILE_UNAVAILABLE = true;
+        var config = new VoxyConfig();
+        config.enabled = false;
+        config.enableRendering = false;
+        return config;
+    }
+
+    public static void reloadAfterVoxyAvailable() {
+        if (LOADED_WHILE_UNAVAILABLE && VoxyCommon.isAvailable()) {
+            LOADED_WHILE_UNAVAILABLE = false;
+            CONFIG = loadOrCreate();
         }
     }
 

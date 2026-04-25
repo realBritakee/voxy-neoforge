@@ -78,7 +78,10 @@ public class VoxyCommon implements ModInitializer {
         if (INSTANCE != null) {
             throw new IllegalStateException("Cannot create multiple instances");
         }
-        INSTANCE = FACTORY.create();
+        var instance = FACTORY.create();
+        if (instance != null) {
+            INSTANCE = instance;
+        }
     }
 
     //Is voxy available in any capacity
