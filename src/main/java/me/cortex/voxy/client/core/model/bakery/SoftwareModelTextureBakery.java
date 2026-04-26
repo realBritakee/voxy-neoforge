@@ -58,7 +58,7 @@ public class SoftwareModelTextureBakery {
 
     private final ReuseVertexConsumer opaqueVC = new ReuseVertexConsumer();
     private final ReuseVertexConsumer translucentVC = new ReuseVertexConsumer(1/* has discard */);
-    private final SoftwareRasterizer rasterizer = new SoftwareRasterizer();
+    private final SoftwareRasterizer rasterizer = new SoftwareRasterizer(ModelFactory.MODEL_TEXTURE_SIZE);
 
 
     public SoftwareModelTextureBakery() {

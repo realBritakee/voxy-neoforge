@@ -1,6 +1,9 @@
 package me.cortex.voxy.client.core.model.bakery;
 
 import me.cortex.voxy.client.core.model.ModelFactory;
+import net.caffeinemc.mods.sodium.api.util.ColorABGR;
+import net.caffeinemc.mods.sodium.api.util.ColorARGB;
+import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -10,7 +13,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class SoftwareRasterizer {
-    public static final int TARGET_SIZE = ModelFactory.MODEL_TEXTURE_SIZE;
+    private final int targetSize;
 
     private final Vector4f scratch = new Vector4f();
 
@@ -35,7 +38,7 @@ public class SoftwareRasterizer {
 
     private static final long DEPTH_MASK = ((1L<<24)-1)<<(64-24);
     private static final long CLEAR_VALUE = DEPTH_MASK;//set the depth to max value and rest of bits to 0
-    private final long[] framebuffer = new long[TARGET_SIZE*TARGET_SIZE];
+    private final long[] framebuffer;
 
     private boolean cullBackFace;
     private boolean doTheBlending;
@@ -44,7 +47,9 @@ public class SoftwareRasterizer {
     private int samplerHeight;
     private int[] samplerTexture;
 
-    public SoftwareRasterizer() {
+    public SoftwareRasterizer(int targetSize) {
+        this.targetSize = targetSize;
+        this.framebuffer = new long[targetSize*targetSize];
     }
 
     public void setFaceCull(boolean isBackFaceCulling) {
@@ -72,13 +77,15 @@ public class SoftwareRasterizer {
         Arrays.fill(this.framebuffer, CLEAR_VALUE);
     }
 
-    public void raster(Matrix4f mvp, ReuseVertexConsumer vertices) {
-        if (vertices.isEmpty()) return;
-        int qc = vertices.quadCount();
-        for (int i = 0; i < qc; i++) {
-            this.rasterQuad(mvp, vertices.getAddress()+ReuseVertexConsumer.VERTEX_FORMAT_SIZE*4L*i);
+    public void raster(Matrix4f mvp, long verticesAddr, int quadCount) {
+        if (quadCount == 0) return;
+        for (int i = 0; i < quadCount; i++) {
+            this.rasterQuad(mvp, verticesAddr+ReuseVertexConsumer.VERTEX_FORMAT_SIZE*4L*i);
         }
-        //Arrays.fill(this.framebuffer, -1);
+    }
+
+    public void raster(Matrix4f mvp, ReuseVertexConsumer vertices) {
+        this.raster(mvp, vertices.getAddress(), vertices.quadCount());
     }
 
     private void rasterQuad(Matrix4f transform, long addr) {
@@ -95,18 +102,18 @@ public class SoftwareRasterizer {
         this.a1.set(this.qmuv1);
         this.a2.set(this.qmuv2);
         this.a3.set(this.qmuv3);
-        this.rasterTriangle();
+        this.rasterTriangle(false);
         this.scratchR1.set(this.scratch3);
         this.scratchR2.set(this.scratch4);
         this.scratchR3.set(this.scratch1);
         this.a1.set(this.qmuv3);
         this.a2.set(this.qmuv4);
         this.a3.set(this.qmuv1);
-        this.rasterTriangle();
+        this.rasterTriangle(true);
 
     }
 
-    private void rasterTriangle() {
+    private void rasterTriangle(boolean orZero) {
         Vector3f v1 = this.scratchR1;
         Vector3f v2 = this.scratchR2;
         Vector3f v3 = this.scratchR3;
@@ -133,9 +140,9 @@ public class SoftwareRasterizer {
         }*/
 
         int minX = Math.max((int) Math.floor(Math.min(Math.min(v1.x, v2.x), v3.x)), 0);
-        int maxX = Math.min((int) Math.ceil(Math.max(Math.max(v1.x, v2.x), v3.x)), TARGET_SIZE-1);
+        int maxX = Math.min((int) Math.ceil(Math.max(Math.max(v1.x, v2.x), v3.x)), this.targetSize-1);
         int minY = Math.max((int) Math.floor(Math.min(Math.min(v1.y, v2.y), v3.y)), 0);
-        int maxY = Math.min((int) Math.ceil(Math.max(Math.max(v1.y, v2.y), v3.y)), TARGET_SIZE-1);
+        int maxY = Math.min((int) Math.ceil(Math.max(Math.max(v1.y, v2.y), v3.y)), this.targetSize-1);
 
         float invArea = 1.0f/area;
         for (int py = minY; py<=maxY; py++) {
@@ -145,11 +152,11 @@ public class SoftwareRasterizer {
                 float w1 = edge(v2, v3, cx, cy)*invArea;
                 float w2 = edge(v3, v1, cx, cy)*invArea;
                 float w3 = 1.0f-w1-w2;
-                if (w1>=0.0f&&w2>=0.0f&&w3>=0.0f) {
+                if ((w1>0.0f&&w2>0.0f&&w3>0.0f)||(orZero&&w1>=0.0f&&w2>=0.0f&&w3>=0.0f)) {
                     //Dont need to worry about perspective correction afak as it should already be all correct
 
                     //pixel is inside the triangle
-                    this.rasterPixel(px+py*TARGET_SIZE, w1, w2, w3);
+                    this.rasterPixel(px+py*this.targetSize, w1, w2, w3);
                 }
             }
         }
@@ -200,7 +207,7 @@ public class SoftwareRasterizer {
         //When blending is enabled do this
         // ARBDrawBuffersBlend.glBlendFuncSeparateiARB(0, GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         if (this.doTheBlending) {//Blending
-            //mutate colour var
+            colour = doBlending(srcColour, colour);
         }
 
 
@@ -210,6 +217,25 @@ public class SoftwareRasterizer {
 
     private static float edge(Vector3f a, Vector3f b, Vector3f c) {
         return (c.x-a.x)*(b.y-a.y) - (c.y-a.y) * (b.x-a.x);
+    }
+
+    private static int doBlending(int scr, int dst) {
+        int srcAlpha = (scr>>>24)&0xFF;
+        if (srcAlpha == 0) {
+            return dst;
+        }
+        int dstAlpha = (dst>>>24)&0xFF;
+        scr &= ~(0xFF<<24);
+        dst &= ~(0xFF<<24);
+        int blendAlpha = Math.min(0xFF,srcAlpha+((dstAlpha*(255-srcAlpha))>>8));
+        int blend = ColorMixer.mix(dst, scr, dstAlpha);
+        return blend|(blendAlpha<<24);
+    }
+
+    private static int addRGB(int a, int b) {
+        return Math.min(0xFF,(a&0xFF)+(b&0xFF))|
+                Math.min((0xFF<<8),(a&(0xFF<<8))+(b&(0xFF<<8)))|
+                Math.min((0xFF<<16),(a&(0xFF<<16))+(b&(0xFF<<16)));
     }
 
     private static float edge(Vector3f a, Vector3f b, float cx, float cy) {
@@ -224,7 +250,7 @@ public class SoftwareRasterizer {
         var vec = transform.transformProject(this.scratch);
         if (Math.abs(this.scratch.w-1.0f)>0.000001f)
             throw new IllegalStateException();
-        out.set(maintainPrecision(Math.fma(vec.x, 0.5f, 0.5f)*TARGET_SIZE), maintainPrecision(Math.fma(vec.y, 0.5f, 0.5f)*TARGET_SIZE), vec.z);//TODO: dont know if z transform is correct
+        out.set(maintainPrecision(Math.fma(vec.x, 0.5f, 0.5f)*this.targetSize), maintainPrecision(Math.fma(vec.y, 0.5f, 0.5f)*this.targetSize), vec.z);//TODO: dont know if z transform is correct
     }
 
 

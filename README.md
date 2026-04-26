@@ -14,6 +14,7 @@ Voxy renders distant terrain using Level-of-Detail (LoD) chunks, allowing you to
 - Nvidium compatibility
 - SSAO (Screen Space Ambient Occlusion) in the distance
 - Configurable via in-game settings screen (Sodium options integration)
+- Includes **Physics Mod ocean compatibility** — ocean renders correctly alongside Voxy LOD terrain
 - Includes **Fix-sodium-ShaderLoader** — fixes Sodium's `ShaderLoader.getResourceAsStream` on NeoForge so Voxy and Nvidium load shaders correctly (based on [coco875/Fix-sodium-ShaderLoader](https://github.com/coco875/Fix-sodium-ShaderLoader), merged directly into this build)
 
 ---
@@ -121,6 +122,12 @@ src/main/java/me/cortex/voxy/
 | Fabric API | 0.116.6+1.21.1 |
 | Group | me.cortex |
 | Archive name | voxy |
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a full list of changes.
 
 ---
 

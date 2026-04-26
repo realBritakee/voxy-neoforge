@@ -216,6 +216,32 @@ public class TextureUtils {
     }
 
 
+    public static boolean hasTranslucentPixel(ColourDepthTextureData data) {
+        for (int i = 0; i < data.colour().length; i++) {
+            int alpha = data.colour()[i]>>>24;
+            int depth = data.depth()[i];
+            if ((depth&0xFF)!=0) {
+                if (alpha!=0&&alpha!=255) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isSolidWhereDrawn(ColourDepthTextureData data) {
+        for (int i = 0; i < data.colour().length; i++) {
+            int alpha = data.colour()[i]>>>24;
+            int depth = data.depth()[i];
+            if ((depth&0xFF)!=0) {
+                if (alpha!=255) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public static int mipColours(boolean darkend, int C00, int C01, int C10, int C11) {
         darkend = !darkend;//Invert to make it easier
         float r = 0.0f;
