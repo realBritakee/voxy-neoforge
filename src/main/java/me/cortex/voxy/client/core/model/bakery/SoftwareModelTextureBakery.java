@@ -6,6 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import me.cortex.voxy.client.core.model.ModelFactory;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import me.cortex.voxy.common.util.UnsafeUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -198,6 +200,44 @@ public class SoftwareModelTextureBakery {
         this.opaqueVC.setDefaultMeta(0);//Reset default meta
     }
 
+<<<<<<< Updated upstream
+=======
+    /**
+     * Physics Mod compat: directly bakes a water top face using the "water_still" sprite
+     * from the block atlas. This is called when Physics Mod's ocean simulation suppresses
+     * the UP face during {@link net.minecraft.client.renderer.block.LiquidBlockRenderer#renderLiquid}
+     * so that Voxy's LOD water chunks always have a visible surface.
+     */
+    private void bakeWaterTopFaceFallback(BlockState state, RenderType layer) {
+        var atlas = Minecraft.getInstance().getModelManager()
+                .getAtlas(TextureAtlas.LOCATION_BLOCKS);
+        // Use water_still for still water; flowing water also falls back to still texture
+        TextureAtlasSprite sprite = atlas.getSprite(
+                new ResourceLocation("minecraft", "block/water_still"));
+
+        float u0 = sprite.getU0();
+        float u1 = sprite.getU1();
+        float v0 = sprite.getV0();
+        float v1 = sprite.getV1();
+
+        // Water top face is translucent and biome-tinted (bit 4 = tinting, bit 1 = discard)
+        // Meta: 4 = tinting enabled, 1 = alpha discard (inherited from translucentVC globalOrMetadata)
+        int meta = 4 | 1; // tinting + discard
+
+        // Emit 4 vertices for the full-block water surface in the XZ plane at Y=1.
+        // These vertices match what vanilla renderLiquid() would emit for the UP face.
+        ReuseVertexConsumer vc = (layer == RenderType.translucent()) ? this.translucentVC : this.opaqueVC;
+        vc.vertex(0.0, 1.0, 0.0).meta(meta).uv(u0, v0);
+        vc.vertex(0.0, 1.0, 1.0).meta(meta).uv(u0, v1);
+        vc.vertex(1.0, 1.0, 1.0).meta(meta).uv(u1, v1);
+        vc.vertex(1.0, 1.0, 0.0).meta(meta).uv(u1, v0);
+
+        // Mark tinting on both VCs' default meta to propagate to ModelFactory
+        this.translucentVC.setDefaultMeta(this.translucentVC.getDefaultMeta() | 4);
+        this.opaqueVC.setDefaultMeta(this.opaqueVC.getDefaultMeta() | 4);
+    }
+
+>>>>>>> Stashed changes
     private static boolean shouldReturnAirForFluid(BlockPos pos, int face) {
         var fv = Direction.from3DDataValue(face).getNormal();
         int dot = fv.getX() * pos.getX() + fv.getY() * pos.getY() + fv.getZ() * pos.getZ();

@@ -170,7 +170,7 @@ dependencies {
 }
 
 
-def targetJavaVersion = 21
+def targetJavaVersion = 17
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
     it.options.release = targetJavaVersion
@@ -178,10 +178,15 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 java {
+<<<<<<< Updated upstream
     def javaVersion = JavaVersion.toVersion(21)
     if (JavaVersion.current() < javaVersion) {
         toolchain.languageVersion = JavaLanguageVersion.of(21)
     }
+=======
+    // Gradle/fabric-loom requires Java 21 to run, but we compile to Java 17 bytecode via options.release
+    // No toolchain override needed — options.release = 17 handles it
+>>>>>>> Stashed changes
 
     // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
     // if it is present.
@@ -195,6 +200,7 @@ sourceSets {
     main {
         java.srcDirs = ['src/main/java']
     }
+<<<<<<< Updated upstream
     java21 {
         java.srcDirs = ['src/java21/java']
         compileClasspath += sourceSets.main.output
@@ -207,10 +213,13 @@ tasks.register('compileJava21', JavaCompile) {
     destinationDirectory = layout.buildDirectory.dir("classes/java21")
 
     options.release = 21
+=======
+>>>>>>> Stashed changes
 }
 
 tasks.jar {
     archiveFileName.set("voxy-0.2.14-alpha.jar")
+<<<<<<< Updated upstream
     dependsOn(tasks.compileJava21)
 
     from(tasks.compileJava21.destinationDirectory) {
@@ -223,6 +232,8 @@ tasks.jar {
                 "Multi-Release": "true"
         )
     }
+=======
+>>>>>>> Stashed changes
 
     from("LICENSE") {
         rename { "${it}_${project.archives_base_name}"}
@@ -233,6 +244,11 @@ tasks.remapJar {
     archiveFileName.set("voxy-0.2.14-Forge-1.20.1.jar")
 }
 
+<<<<<<< Updated upstream
+=======
+// java21 sourceset removed — ExpansionUtil ported to Java 17 software implementation
+
+>>>>>>> Stashed changes
 publishing() {
 	publications() {
 		mavenJava(MavenPublication) {
