@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import me.cortex.voxy.client.compat.PhysicsModCompat;
 import me.cortex.voxy.client.core.model.ModelFactory;
 import me.cortex.voxy.common.util.UnsafeUtil;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -198,6 +201,41 @@ public class SoftwareModelTextureBakery {
         this.opaqueVC.setDefaultMeta(0);//Reset default meta
     }
 
+    /**
+     * Physics Mod compat: directly bakes a water top face using the "water_still" sprite
+     * from the block atlas. This is called when Physics Mod's ocean simulation suppresses
+     * the UP face during {@link net.minecraft.client.renderer.block.LiquidBlockRenderer#renderLiquid}
+     * so that Voxy's LOD water chunks always have a visible surface.
+     */
+    private void bakeWaterTopFaceFallback(BlockState state, RenderType layer) {
+        var atlas = Minecraft.getInstance().getModelManager()
+                .getAtlas(TextureAtlas.LOCATION_BLOCKS);
+        // Use water_still for still water; flowing water also falls back to still texture
+        TextureAtlasSprite sprite = atlas.getSprite(
+                ResourceLocation.withDefaultNamespace("block/water_still"));
+
+        float u0 = sprite.getU0();
+        float u1 = sprite.getU1();
+        float v0 = sprite.getV0();
+        float v1 = sprite.getV1();
+
+        // Water top face is translucent and biome-tinted (bit 4 = tinting, bit 1 = discard)
+        // Meta: 4 = tinting enabled, 1 = alpha discard (inherited from translucentVC globalOrMetadata)
+        int meta = 4 | 1; // tinting + discard
+
+        // Emit 4 vertices for the full-block water surface in the XZ plane at Y=1.
+        // These vertices match what vanilla renderLiquid() would emit for the UP face.
+        ReuseVertexConsumer vc = (layer == RenderType.translucent()) ? this.translucentVC : this.opaqueVC;
+        vc.addVertex(0.0f, 1.0f, 0.0f).meta(meta).setUv(u0, v0);
+        vc.addVertex(0.0f, 1.0f, 1.0f).meta(meta).setUv(u0, v1);
+        vc.addVertex(1.0f, 1.0f, 1.0f).meta(meta).setUv(u1, v1);
+        vc.addVertex(1.0f, 1.0f, 0.0f).meta(meta).setUv(u1, v0);
+
+        // Mark tinting on both VCs' default meta to propagate to ModelFactory
+        this.translucentVC.setDefaultMeta(this.translucentVC.getDefaultMeta() | 4);
+        this.opaqueVC.setDefaultMeta(this.opaqueVC.getDefaultMeta() | 4);
+    }
+
     private static boolean shouldReturnAirForFluid(BlockPos pos, int face) {
         var fv = Direction.from3DDataValue(face).getNormal();
         int dot = fv.getX() * pos.getX() + fv.getY() * pos.getY() + fv.getZ() * pos.getZ();
@@ -274,6 +312,14 @@ public class SoftwareModelTextureBakery {
                 this.opaqueVC.reset();
                 this.translucentVC.reset();
                 this.bakeFluidState(state, i, blockRenderLayer);
+                // Physics Mod compat: ocean simulation suppresses the UP face in renderLiquid().
+                // When that happens, fall back to a direct sprite-based bake so LOD water
+                // always has a visible top face (fixes PhysicsMod issue #1101).
+                if (this.opaqueVC.isEmpty() && this.translucentVC.isEmpty()
+                        && i == 1 /* Direction.UP */
+                        && PhysicsModCompat.isOceanEnabled()) {
+                    this.bakeWaterTopFaceFallback(state, blockRenderLayer);
+                }
                 if (this.opaqueVC.isEmpty() && this.translucentVC.isEmpty())
                     continue;
                 isAnyShaded |= this.opaqueVC.anyShaded | this.translucentVC.anyShaded;
