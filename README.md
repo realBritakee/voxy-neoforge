@@ -21,7 +21,9 @@ Voxy renders distant terrain using Level-of-Detail (LoD) chunks, allowing you to
 - SSAO (Screen Space Ambient Occlusion) in the distance
 - Configurable via in-game settings screen
 - Works on **Fabric** and **Forge** (via Connector + Forgified Fabric API)
-- Includes **Physics Mod ocean compatibility** — ocean renders correctly alongside Voxy LOD terrain
+- Includes **Physics Mod ocean compatibility** — ocean waves render correctly alongside Voxy LoD terrain within your render distance
+
+  > **⚠️ Physics Mod ocean limitation:** Wave simulation only applies within your default Minecraft render distance. Chunks further out rendered by Voxy's LoD system will show as normal flat water without physics — this is a Physics Mod limitation, not a Voxy issue.
 - **Java 17 compatible** — no Java 21 required at runtime
 
 ---
