@@ -1,13 +1,13 @@
-# Voxy — Fabric 1.20.1 (Forge-compatible via Connector)
+# Voxy - Fabric 1.20.1 (Forge-compatible via Connector)
 
-> **Far-distance LoD rendering for Minecraft 1.20.1 — Fabric mod with Forge support via Connector**
+> **Far-distance LoD rendering for Minecraft 1.20.1 - Fabric mod with Forge support via Connector**
 
 Voxy renders distant terrain using Level-of-Detail (LoD) chunks, allowing you to see far beyond Minecraft's normal render distance without the performance cost of loading full chunks. This is the **Fabric 1.20.1** build (`v0.2.14-Forge-1.20.1`), based on the original by [Cortex](https://github.com/CortexMC).
 
 
 > **Works best with:**
-> 🌍 [Voxy World Gen V2](https://github.com/realBritakee/voxy_worldgen_v2) — background chunk pre-generation for 1.20.1/1.21.1 · [other versions](https://modrinth.com/mod/voxy-worldgen)
-> 🎨 [Photon Shaders — Reimagined](https://github.com/realBritakee/photon) — custom Photon fork with Physics Mod ocean support & Colorwheel (Create)
+> 🌍 [Voxy World Gen V2](https://github.com/realBritakee/voxy_worldgen_v2) - background chunk pre-generation for 1.20.1/1.21.1 · [other versions](https://modrinth.com/mod/voxy-worldgen)
+> 🎨 [Photon Shaders - Reimagined](https://github.com/realBritakee/photon) - custom Photon fork with Physics Mod ocean support & Colorwheel (Create)
 
 ---
 
@@ -21,10 +21,10 @@ Voxy renders distant terrain using Level-of-Detail (LoD) chunks, allowing you to
 - SSAO (Screen Space Ambient Occlusion) in the distance
 - Configurable via in-game settings screen
 - Works on **Fabric** and **Forge** (via Connector + Forgified Fabric API)
-- Includes **Physics Mod ocean compatibility** — ocean waves render correctly alongside Voxy LoD terrain within your render distance
+- Includes **Physics Mod ocean compatibility** - ocean waves render correctly alongside Voxy LoD terrain within your render distance
 
-  > **⚠️ Physics Mod ocean limitation:** Wave simulation only applies within your default Minecraft render distance. Chunks further out rendered by Voxy's LoD system will show as normal flat water without physics — this is a Physics Mod limitation, not a Voxy issue.
-- **Java 17 compatible** — no Java 21 required at runtime
+  > **⚠️ Physics Mod ocean limitation:** Wave simulation only applies within your default Minecraft render distance. Chunks further out rendered by Voxy's LoD system will show as normal flat water without physics - this is a Physics Mod limitation, not a Voxy issue.
+- **Java 17 compatible** - no Java 21 required at runtime
 
 ---
 
@@ -123,15 +123,15 @@ Install via [Modrinth](https://modrinth.com/shaders) and select in **Iris Option
 ```
 src/main/java/me/cortex/voxy/
 ├── client/
-│   ├── core/           — Render pipeline, GL abstractions, shader system
-│   ├── mixin/          — Mixins for Sodium/Embeddium, Iris, Nvidium, Minecraft
-│   ├── config/         — VoxyConfig, settings screen
-│   ├── compat/         — Flashback, Iris compatibility
-│   └── ClientImportManager.java  — World import/export
-└── commonImpl/          — Shared world/chunk management logic
+│   ├── core/           - Render pipeline, GL abstractions, shader system
+│   ├── mixin/          - Mixins for Sodium/Embeddium, Iris, Nvidium, Minecraft
+│   ├── config/         - VoxyConfig, settings screen
+│   ├── compat/         - Flashback, Iris compatibility
+│   └── ClientImportManager.java  - World import/export
+└── commonImpl/          - Shared world/chunk management logic
 
 src/main/resources/
-└── assets/voxy/shaders/  — 50+ GLSL shader files (compute, vertex, fragment)
+└── assets/voxy/shaders/  - 50+ GLSL shader files (compute, vertex, fragment)
 ```
 
 ---
@@ -200,12 +200,12 @@ See [CHANGELOG.md](CHANGELOG.md) for a full list of changes.
 ## Related Projects
 
 ### Voxy World Gen V2
-Background chunk pre-generation for Voxy — silently generates and auto-ingests chunks into Voxy's LOD system.
+Background chunk pre-generation for Voxy - silently generates and auto-ingests chunks into Voxy's LOD system.
 
 - **1.20.1 / 1.21.1** → [github.com/realBritakee/voxy_worldgen_v2](https://github.com/realBritakee/voxy_worldgen_v2) *(custom port)*
 - **Other versions** → [modrinth.com/mod/voxy-worldgen](https://modrinth.com/mod/voxy-worldgen) *(official)*
 
-### Photon Shaders — Reimagined
-Custom Photon fork with native Physics Mod ocean support and Colorwheel (Create) shading — fully compatible with this Voxy build.
+### Photon Shaders - Reimagined
+Custom Photon fork with native Physics Mod ocean support and Colorwheel (Create) shading - fully compatible with this Voxy build.
 
 - **All versions** → [github.com/realBritakee/photon](https://github.com/realBritakee/photon) *(always up to date)*
