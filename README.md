@@ -187,3 +187,18 @@ See [CHANGELOG.md](CHANGELOG.md) for a full list of changes.
 ---
 
 ## License
+
+---
+
+## Related Projects
+
+### Voxy World Gen V2
+Background chunk pre-generation for Voxy — silently generates and auto-ingests chunks into Voxy's LOD system.
+
+- **1.20.1 / 1.21.1** → [github.com/realBritakee/voxy_worldgen_v2](https://github.com/realBritakee/voxy_worldgen_v2) *(custom port)*
+- **Other versions** → [modrinth.com/mod/voxy-worldgen](https://modrinth.com/mod/voxy-worldgen) *(official)*
+
+### Photon Shaders — Reimagined
+Custom Photon fork with native Physics Mod ocean support and Colorwheel (Create) shading — fully compatible with this Voxy build.
+
+- **All versions** → [github.com/realBritakee/photon](https://github.com/realBritakee/photon) *(always up to date)*
