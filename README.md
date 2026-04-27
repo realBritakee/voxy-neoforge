@@ -4,6 +4,11 @@
 
 Voxy renders distant terrain using Level-of-Detail (LoD) chunks, allowing you to see far beyond Minecraft's normal render distance without the performance cost of loading full chunks. This is the **NeoForge 1.21.1** port (`v0.2.14-NeoForge-1.21.1`), based on the original Fabric mod by [Cortex](https://github.com/CortexMC).
 
+
+> **Works best with:**
+> 🌍 [Voxy World Gen V2](https://github.com/realBritakee/voxy_worldgen_v2) — background chunk pre-generation for 1.20.1/1.21.1 · [other versions](https://modrinth.com/mod/voxy-worldgen)
+> 🎨 [Photon Shaders — Reimagined](https://github.com/realBritakee/photon) — custom Photon fork with Physics Mod ocean support & Colorwheel (Create)
+
 ---
 
 ## Features
