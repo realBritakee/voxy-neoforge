@@ -1,0 +1,56 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug] Describe your issue"
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill in as much detail as possible so we can reproduce and fix the issue.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected to happen instead.
+      placeholder: Describe the issue and steps to reproduce it.
+    validations:
+      required: true
+  - type: dropdown
+    id: mc-version
+    attributes:
+      label: Minecraft Version
+      options:
+        - 1.21.1
+        - 1.21
+        - 1.20.1
+        - 1.20
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: voxy-version
+    attributes:
+      label: Voxy Version
+      description: The Voxy NeoForge mod version you are using.
+      placeholder: e.g. 0.3.2
+    validations:
+      required: true
+  - type: input
+    id: neoforge-version
+    attributes:
+      label: NeoForge Version
+      placeholder: e.g. 21.1.80
+    validations:
+      required: true
+  - type: textarea
+    id: other-mods
+    attributes:
+      label: Other Relevant Mods
+      description: List any mods you think might be related to the issue.
+      placeholder: e.g. Create 6.0.0, Sodium 0.5.11
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output
+      description: Paste any relevant crash report or log lines here.
+      render: text
