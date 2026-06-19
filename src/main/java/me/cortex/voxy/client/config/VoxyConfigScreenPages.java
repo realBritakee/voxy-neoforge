@@ -201,7 +201,8 @@ public abstract class VoxyConfigScreenPages {
 
         pageBuilder.addOptionGroup(fogGroup);
         
-        var modBuilder = builder.registerModOptions("voxy", "Voxy", "1.0");
+        var modBuilder = builder.registerModOptions("voxy", "Voxy", "0.2.15-NeoForge-1.21.1");
+        modBuilder.setNonTintedIcon(ResourceLocation.parse("voxy:icon.png"));
         modBuilder.addPage(pageBuilder);
     }
 

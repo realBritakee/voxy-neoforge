@@ -33,5 +33,7 @@ crash-reports/
 # Temporary / Scratch Files
 /scratch/
 /cfr_output/
+/cfr_reeses/
 cfr.jar
 *.tmp
+/*.java
