@@ -8,7 +8,6 @@ import me.cortex.voxy.client.core.SSAO;
 import me.cortex.voxy.common.Logger;
 import me.cortex.voxy.common.util.cpu.CpuLayout;
 import me.cortex.voxy.commonImpl.VoxyCommon;
-import net.caffeinemc.mods.sodium.client.gui.options.storage.OptionStorage;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.FileReader;
@@ -18,7 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
-public class VoxyConfig implements OptionStorage<VoxyConfig> {
+public class VoxyConfig {
     private static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .setPrettyPrinting()
@@ -95,11 +94,6 @@ public class VoxyConfig implements OptionStorage<VoxyConfig> {
         return FabricLoader.getInstance()
                 .getConfigDir()
                 .resolve("voxy-config.json");
-    }
-
-    @Override
-    public VoxyConfig getData() {
-        return this;
     }
 
     public boolean isRenderingEnabled() {

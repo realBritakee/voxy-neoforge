@@ -12,13 +12,11 @@ import java.util.Set;
 public class ClientVoxyMixinPlugin implements IMixinConfigPlugin {
     private static boolean valkyrienSkiesInstalled;
     private static boolean nvidiumInstalled;
-    private static boolean connectorInstalled = false;
 
     @Override
     public void onLoad(String mixinPackage) {
         valkyrienSkiesInstalled = FabricLoader.getInstance().isModLoaded("valkyrienskies");
         nvidiumInstalled = FabricLoader.getInstance().isModLoaded("nvidium");
-        connectorInstalled = FabricLoader.getInstance().isModLoaded("connector");
     }
 
     @Override
@@ -32,8 +30,9 @@ public class ClientVoxyMixinPlugin implements IMixinConfigPlugin {
             mixins.add("sodium.MixinDefaultChunkRenderer");
         }
 
-        if (connectorInstalled) {
-            mixins.add("sodium.MixinShaderLoader");
+        // Register the Voxy config page into Sodium's options UI
+        if (FabricLoader.getInstance().isModLoaded("sodium")) {
+            mixins.add("sodium.MixinSodiumGameOptionPages");
         }
 
         return mixins;
@@ -50,4 +49,4 @@ public class ClientVoxyMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
-}
+}

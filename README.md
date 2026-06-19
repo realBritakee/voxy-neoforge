@@ -2,7 +2,7 @@
 
 > **Far-distance LoD rendering for Minecraft 1.21.1 - NeoForge build**
 
-Voxy renders distant terrain using Level-of-Detail (LoD) chunks, allowing you to see far beyond Minecraft's normal render distance without the performance cost of loading full chunks. This is the **NeoForge 1.21.1** port (`v0.2.14-NeoForge-1.21.1`), based on the original Fabric mod by [Cortex](https://github.com/CortexMC).
+Voxy renders distant terrain using Level-of-Detail (LoD) chunks, allowing you to see far beyond Minecraft's normal render distance without the performance cost of loading full chunks. This is the **NeoForge 1.21.1** port (`v0.2.15-NeoForge-1.21.1`), based on the original Fabric mod by [Cortex](https://github.com/CortexMC).
 
 
 > **Works best with:**
@@ -47,7 +47,7 @@ Voxy renders distant terrain using Level-of-Detail (LoD) chunks, allowing you to
 | NeoForge | 21.1.x | |
 | Sinytra Connector | latest | Bridges Fabric mods to NeoForge |
 | Forgified Fabric API | latest | NeoForge port of Fabric API, required by Connector |
-| Sodium (NeoForge) | ≥ 0.6.13 | Required - use the NeoForge build of Sodium |
+| Sodium (NeoForge) | ≥ 0.8.12 | Required - use the NeoForge build of Sodium |
 | Java | 17+ | Shipped with Minecraft 1.21.1 |
 | OpenGL | 4.6 | GPU must support OpenGL 4.6 (most GPUs from 2017+) |
 
@@ -88,7 +88,7 @@ On Windows (PowerShell):
 1. Install [NeoForge 21.1.x](https://neoforged.net/) for Minecraft 1.21.1
 2. Install [Sinytra Connector](https://modrinth.com/mod/connector)
 3. Install [Forgified Fabric API](https://modrinth.com/mod/forgified-fabric-api)
-4. Install [Sodium for NeoForge](https://modrinth.com/mod/sodium) (≥ 0.6.13)
+4. Install [Sodium for NeoForge](https://modrinth.com/mod/sodium) (≥ 0.8.12)
 5. Drop `voxy-<version>.jar` into your `mods/` folder
 6. Launch and configure via **Options → Video Settings → Voxy**
 
@@ -123,7 +123,7 @@ src/main/java/me/cortex/voxy/
 
 | Property | Value |
 |---|---|
-| Mod version | 0.2.14-NeoForge-1.21.1 |
+| Mod version | 0.2.15-NeoForge-1.21.1 |
 | Minecraft | 1.21.1 |
 | Fabric Loader | 0.17.2 |
 | Fabric API | 0.116.6+1.21.1 |

@@ -1,0 +1,3 @@
+All files must be written in the same style as the rest of the codebase.
+All comments must be clean and concise, matching style of the other comments.
+All files should be placed in respective folders.

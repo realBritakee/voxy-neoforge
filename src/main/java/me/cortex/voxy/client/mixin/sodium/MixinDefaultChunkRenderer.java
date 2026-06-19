@@ -29,7 +29,7 @@ public abstract class MixinDefaultChunkRenderer extends ShaderChunkRenderer {
     }
 
     @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
-    private void cancelThingie(ChunkRenderMatrices matrices, CommandList commandList, ChunkRenderListIterable renderLists, TerrainRenderPass renderPass, CameraTransform camera, CallbackInfo ci) {
+    private void cancelThingie(ChunkRenderMatrices matrices, CommandList commandList, ChunkRenderListIterable renderLists, TerrainRenderPass renderPass, CameraTransform camera, boolean hasFrustum, CallbackInfo ci) {
         if (VoxyClient.disableSodiumChunkRender()) {
             super.begin(renderPass);
             this.doRender(matrices, renderPass, camera);
@@ -39,7 +39,7 @@ public abstract class MixinDefaultChunkRenderer extends ShaderChunkRenderer {
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/render/chunk/ShaderChunkRenderer;end(Lnet/caffeinemc/mods/sodium/client/render/chunk/terrain/TerrainRenderPass;)V", shift = At.Shift.BEFORE))
-    private void injectRender(ChunkRenderMatrices matrices, CommandList commandList, ChunkRenderListIterable renderLists, TerrainRenderPass renderPass, CameraTransform camera, CallbackInfo ci) {
+    private void injectRender(ChunkRenderMatrices matrices, CommandList commandList, ChunkRenderListIterable renderLists, TerrainRenderPass renderPass, CameraTransform camera, boolean hasFrustum, CallbackInfo ci) {
         this.doRender(matrices, renderPass, camera);
     }
 

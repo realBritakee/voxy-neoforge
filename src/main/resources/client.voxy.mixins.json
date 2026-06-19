@@ -36,9 +36,7 @@
     // "sodium.MixinDefaultChunkRenderer",
     // "sodium.MixinRenderRegionManager",
     "sodium.MixinRenderSectionManager",
-    "sodium.MixinShaderLoader",
-    "sodium.MixinSodiumWorldRenderer",
-    "sodium.MixinSodiumOptionsGUI"
+    "sodium.MixinSodiumWorldRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

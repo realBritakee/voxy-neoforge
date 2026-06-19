@@ -7,179 +7,202 @@ import me.cortex.voxy.client.core.SSAO;
 import me.cortex.voxy.client.core.util.IrisUtil;
 import me.cortex.voxy.common.util.cpu.CpuLayout;
 import me.cortex.voxy.commonImpl.VoxyCommon;
-import net.caffeinemc.mods.sodium.client.gui.options.*;
-import net.caffeinemc.mods.sodium.client.gui.options.control.CyclingControl;
-import net.caffeinemc.mods.sodium.client.gui.options.control.SliderControl;
-import net.caffeinemc.mods.sodium.client.gui.options.control.TickBoxControl;
+
+import net.caffeinemc.mods.sodium.api.config.StorageEventHandler;
+import net.caffeinemc.mods.sodium.api.config.option.OptionFlag;
+import net.caffeinemc.mods.sodium.api.config.option.OptionImpact;
+import net.caffeinemc.mods.sodium.api.config.structure.ConfigBuilder;
+import net.caffeinemc.mods.sodium.api.config.structure.OptionPageBuilder;
+import net.caffeinemc.mods.sodium.api.config.structure.OptionGroupBuilder;
+import net.caffeinemc.mods.sodium.client.config.structure.OptionPage;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class VoxyConfigScreenPages {
-    private static final Component[] SSAO_MODE_LABELS = {
-            Component.translatable("voxy.config.general.ssao_mode.auto"),
-            Component.translatable("voxy.config.general.ssao_mode.basic"),
-            Component.translatable("voxy.config.general.ssao_mode.better"),
-            Component.translatable("voxy.config.general.ssao_mode.best")
-    };
-
     private VoxyConfigScreenPages(){}
 
     public static OptionPage voxyOptionPage = null;
 
-    public static OptionPage page() {
-        List<OptionGroup> groups = new ArrayList<>();
-        VoxyConfig storage = VoxyConfig.CONFIG;
+    public static void register(net.caffeinemc.mods.sodium.api.config.structure.ConfigBuilder builder) {
+        StorageEventHandler storage = () -> VoxyConfig.CONFIG.save();
 
-        //General
-        groups.add(OptionGroup.createBuilder()
-                .add(OptionImpl.createBuilder(boolean.class, storage)
-                        .setName(Component.translatable("voxy.config.general.enabled"))
-                        .setTooltip(Component.translatable("voxy.config.general.enabled.tooltip"))
-                        .setControl(TickBoxControl::new)
-                        .setBinding((s, v)->{
-                            s.enabled = v;
-                            if (v && ClientSessionEvents.inSession) {
-                                VoxyCommon.createInstance();
-                            }
+        OptionPageBuilder pageBuilder = builder.createOptionPage()
+            .setName(Component.translatable("voxy.config.title"));
 
-                            if (!v) {
-                                var vrsh = (IGetVoxyRenderSystem) Minecraft.getInstance().levelRenderer;
-                                if (vrsh != null) {
-                                    vrsh.voxy$shutdownRenderer();
-                                }
-                                VoxyCommon.shutdownInstance();
-                            }
+        OptionGroupBuilder generalGroup = builder.createOptionGroup();
 
-                            try { IrisUtil.reload(); } catch (Throwable ignored) {}
-                        }, s -> s.enabled)
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
-                        .build()
-                ).build()
+        generalGroup.addOption(builder.createBooleanOption(ResourceLocation.parse("voxy:enabled"))
+                .setName(Component.translatable("voxy.config.general.enabled"))
+                .setTooltip(Component.translatable("voxy.config.general.enabled.tooltip"))
+                .setStorageHandler(storage)
+                .setDefaultValue(true)
+                .setBinding((v)->{
+                    VoxyConfig s = VoxyConfig.CONFIG;
+                    s.enabled = v;
+                    if (v && ClientSessionEvents.inSession) {
+                        VoxyCommon.createInstance();
+                    }
+
+                    if (!v) {
+                        var vrsh = (IGetVoxyRenderSystem) Minecraft.getInstance().levelRenderer;
+                        if (vrsh != null) {
+                            vrsh.voxy$shutdownRenderer();
+                        }
+                        VoxyCommon.shutdownInstance();
+                    }
+
+                    try { IrisUtil.reload(); } catch (Throwable ignored) {}
+                }, () -> VoxyConfig.CONFIG.enabled)
+                .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
         );
 
-        groups.add(OptionGroup.createBuilder()
-                .add(OptionImpl.createBuilder(int.class, storage)
-                        .setName(Component.translatable("voxy.config.general.serviceThreads"))
-                        .setTooltip(Component.translatable("voxy.config.general.serviceThreads.tooltip"))
-                        .setControl(opt -> new SliderControl(opt,
-                                1,
-                                CpuLayout.getCoreCount(),
-                                1,
-                                v -> Component.literal(Integer.toString(v))))
-                        .setBinding((s, v) -> {
-                            s.serviceThreads = v;
-                            var instance = VoxyCommon.getInstance();
-                            if (instance != null) {
-                                instance.updateDedicatedThreads();
-                            }
-                        }, s -> s.serviceThreads)
-                        .setImpact(OptionImpact.HIGH)
-                        .build()
-                ).add(OptionImpl.createBuilder(boolean.class, storage)
-                        .setName(Component.translatable("voxy.config.general.useSodiumBuilder"))
-                        .setTooltip(Component.translatable("voxy.config.general.useSodiumBuilder.tooltip"))
-                        .setControl(TickBoxControl::new)
-                        .setImpact(OptionImpact.VARIES)
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
-                        .setBinding((s, v) -> {
-                            s.dontUseSodiumBuilderThreads = !v;
-                            var instance = VoxyCommon.getInstance();
-                            if (instance != null) {
-                                instance.updateDedicatedThreads();
-                            }
-                        }, s->!s.dontUseSodiumBuilderThreads)
-                        .build()
-                ).add(OptionImpl.createBuilder(boolean.class, storage)
-                        .setName(Component.translatable("voxy.config.general.ingest"))
-                        .setTooltip(Component.translatable("voxy.config.general.ingest.tooltip"))
-                        .setControl(TickBoxControl::new)
-                        .setBinding((s, v) -> s.ingestEnabled = v, s -> s.ingestEnabled)
-                        .setImpact(OptionImpact.MEDIUM)
-                        .build()
-                ).build()
+        generalGroup.addOption(builder.createBooleanOption(ResourceLocation.parse("voxy:enable_rendering"))
+                .setName(Component.translatable("voxy.config.general.rendering"))
+                .setTooltip(Component.translatable("voxy.config.general.rendering.tooltip"))
+                .setStorageHandler(storage)
+                .setDefaultValue(true)
+                .setBinding((v) -> {
+                    VoxyConfig.CONFIG.enableRendering = v;
+                    var vrsh = (IGetVoxyRenderSystem) Minecraft.getInstance().levelRenderer;
+                    if (vrsh != null) {
+                        if (v) {
+                            vrsh.voxy$createRenderer();
+                        } else {
+                            vrsh.voxy$shutdownRenderer();
+                        }
+                    }
+                    try { IrisUtil.reload(); } catch (Throwable ignored) {}
+                }, () -> VoxyConfig.CONFIG.enableRendering)
+                .setImpact(OptionImpact.HIGH)
+                .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
         );
 
-        groups.add(OptionGroup.createBuilder()
-                .add(OptionImpl.createBuilder(boolean.class, storage)
-                        .setName(Component.translatable("voxy.config.general.rendering"))
-                        .setTooltip(Component.translatable("voxy.config.general.rendering.tooltip"))
-                        .setControl(TickBoxControl::new)
-                        .setBinding((s, v)->{
-                            s.enableRendering = v;
-                            var vrsh = (IGetVoxyRenderSystem)Minecraft.getInstance().levelRenderer;
-                            if (vrsh != null) {
-                                if (v) {
-                                    vrsh.voxy$createRenderer();
-                                } else {
-                                    vrsh.voxy$shutdownRenderer();
-                                }
-                            }
-                            try { IrisUtil.reload(); } catch (Throwable ignored) {}
-                        }, s -> s.enableRendering)
-                        .setImpact(OptionImpact.HIGH)
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
-                        .build()
-                ).add(OptionImpl.createBuilder(int.class, storage)
-                        .setName(Component.translatable("voxy.config.general.subDivisionSize"))
-                        .setTooltip(Component.translatable("voxy.config.general.subDivisionSize.tooltip"))
-                        .setControl(opt -> new SliderControl(opt, 0, SUBDIV_IN_MAX, 1, v -> Component.literal(Integer.toString(Math.round(ln2subDiv(v))))))
-                        .setBinding((s, v) -> s.subDivisionSize = ln2subDiv(v), s -> subDiv2ln(s.subDivisionSize))
-                        .setImpact(OptionImpact.HIGH)
-                        .build()
-                ).add(OptionImpl.createBuilder(int.class, storage)
-                        .setName(Component.translatable("voxy.config.general.renderDistance"))
-                        .setTooltip(Component.translatable("voxy.config.general.renderDistance.tooltip"))
-                        // Range: 10 to 64*16 (1024). Display: v*2
-                        .setControl(opt -> new SliderControl(opt, 10, 64 * 16, 1, v -> Component.literal(Integer.toString(v * 2))))
-                        .setBinding((s, v) -> {
-                            // Value stored as float fraction
-                            s.sectionRenderDistance = ((float)v) / 16.0f;
-
-                            var vrsh = (IGetVoxyRenderSystem) Minecraft.getInstance().levelRenderer;
-                            if (vrsh != null) {
-                                var vrs = vrsh.voxy$getRenderSystem();
-                                if (vrs != null) {
-                                    vrs.setRenderDistance(s.sectionRenderDistance);
-                                }
-                            }
-                        }, s -> Math.round(s.sectionRenderDistance * 16))
-                        .setImpact(OptionImpact.LOW)
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
-                        .build()
-                ).build()
+        generalGroup.addOption(builder.createIntegerOption(ResourceLocation.parse("voxy:sub_division_size"))
+                .setName(Component.translatable("voxy.config.general.subDivisionSize"))
+                .setTooltip(Component.translatable("voxy.config.general.subDivisionSize.tooltip"))
+                .setStorageHandler(storage)
+                .setDefaultValue(subDiv2ln(64f))
+                .setValueFormatter(v -> Component.literal(String.valueOf(v)))
+                .setRange(0, SUBDIV_IN_MAX, 1)
+                .setBinding((v) -> VoxyConfig.CONFIG.subDivisionSize = ln2subDiv(v), () -> subDiv2ln(VoxyConfig.CONFIG.subDivisionSize))
+                .setImpact(OptionImpact.HIGH)
         );
 
-        groups.add(OptionGroup.createBuilder()
-                .add(OptionImpl.createBuilder(boolean.class, storage)
-                        .setName(Component.translatable("voxy.config.general.render_fog"))
-                        .setTooltip(Component.translatable("voxy.config.general.render_fog.tooltip"))
-                        .setControl(TickBoxControl::new)
-                        .setBinding((s, v) -> s.renderVanillaFog = v, s -> s.renderVanillaFog)
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
-                        .build()
-                ).add(OptionImpl.createBuilder(int.class, storage)
-                    .setName(Component.literal("Sky fog distance"))
-                    .setTooltip(Component.literal("Higher distance, sharper sky fog"))
-                    .setControl(opt -> new SliderControl(opt, 16, 512, 16, v -> Component.literal(Integer.toString(v))))
-                    .setBinding((s, v) -> s.skyFogDistance = v, s -> s.skyFogDistance)
-                    .build()
-                ).add(OptionImpl.createBuilder(SSAO.SSAOMode.class, storage)
-                        .setName(Component.translatable("voxy.config.general.ssao_mode"))
-                        .setTooltip(Component.translatable("voxy.config.general.ssao_mode.tooltip"))
-                        .setControl(opt -> new CyclingControl<>(opt, SSAO.SSAOMode.class, SSAO_MODE_LABELS))
-                        .setBinding((s, v) -> {
-                            s.setSSAOMode(v);
-                            reloadActiveRenderer();
-                        }, VoxyConfig::getSSAOMode)
-                        .setImpact(OptionImpact.HIGH)
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
-                        .build()
-                ).build()
+        generalGroup.addOption(builder.createIntegerOption(ResourceLocation.parse("voxy:render_distance"))
+                .setName(Component.translatable("voxy.config.general.renderDistance"))
+                .setTooltip(Component.translatable("voxy.config.general.renderDistance.tooltip"))
+                .setStorageHandler(storage)
+                .setDefaultValue(16 * 16)
+                .setValueFormatter(v -> Component.literal(String.valueOf(v)))
+                .setRange(10, 64 * 16, 1)
+                .setBinding((v) -> {
+                    VoxyConfig.CONFIG.sectionRenderDistance = ((float)v) / 16.0f;
+                    var vrsh = (IGetVoxyRenderSystem) Minecraft.getInstance().levelRenderer;
+                    if (vrsh != null) {
+                        var vrs = vrsh.voxy$getRenderSystem();
+                        if (vrs != null) {
+                            vrs.setRenderDistance(VoxyConfig.CONFIG.sectionRenderDistance);
+                        }
+                    }
+                }, () -> Math.round(VoxyConfig.CONFIG.sectionRenderDistance * 16))
+                .setImpact(OptionImpact.LOW)
+                .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
         );
-        return new OptionPage(Component.translatable("voxy.config.title"), ImmutableList.copyOf(groups));
+
+        pageBuilder.addOptionGroup(generalGroup);
+
+        OptionGroupBuilder threadGroup = builder.createOptionGroup();
+
+        threadGroup.addOption(builder.createIntegerOption(ResourceLocation.parse("voxy:service_threads"))
+                .setName(Component.translatable("voxy.config.general.serviceThreads"))
+                .setTooltip(Component.translatable("voxy.config.general.serviceThreads.tooltip"))
+                .setStorageHandler(storage)
+                .setDefaultValue((int) Math.max(CpuLayout.getCoreCount()/1.5, 1))
+                .setValueFormatter(v -> Component.literal(String.valueOf(v)))
+                .setRange(1, CpuLayout.getCoreCount(), 1)
+                .setBinding((v) -> {
+                    VoxyConfig.CONFIG.serviceThreads = v;
+                    var instance = VoxyCommon.getInstance();
+                    if (instance != null) {
+                        instance.updateDedicatedThreads();
+                    }
+                }, () -> VoxyConfig.CONFIG.serviceThreads)
+                .setImpact(OptionImpact.HIGH)
+        );
+
+        threadGroup.addOption(builder.createBooleanOption(ResourceLocation.parse("voxy:use_sodium_builder"))
+                .setName(Component.translatable("voxy.config.general.useSodiumBuilder"))
+                .setTooltip(Component.translatable("voxy.config.general.useSodiumBuilder.tooltip"))
+                .setStorageHandler(storage)
+                .setDefaultValue(true)
+                .setImpact(OptionImpact.VARIES)
+                .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                .setBinding((v) -> {
+                    VoxyConfig.CONFIG.dontUseSodiumBuilderThreads = !v;
+                    var instance = VoxyCommon.getInstance();
+                    if (instance != null) {
+                        instance.updateDedicatedThreads();
+                    }
+                }, ()->!VoxyConfig.CONFIG.dontUseSodiumBuilderThreads)
+        );
+
+        threadGroup.addOption(builder.createBooleanOption(ResourceLocation.parse("voxy:ingest"))
+                .setName(Component.translatable("voxy.config.general.ingest"))
+                .setTooltip(Component.translatable("voxy.config.general.ingest.tooltip"))
+                .setStorageHandler(storage)
+                .setDefaultValue(true)
+                .setBinding((v) -> VoxyConfig.CONFIG.ingestEnabled = v, () -> VoxyConfig.CONFIG.ingestEnabled)
+                .setImpact(OptionImpact.HIGH)
+                .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+        );
+
+        pageBuilder.addOptionGroup(threadGroup);
+
+        OptionGroupBuilder fogGroup = builder.createOptionGroup();
+
+        fogGroup.addOption(builder.createBooleanOption(ResourceLocation.parse("voxy:render_fog"))
+                .setName(Component.translatable("voxy.config.general.render_fog"))
+                .setTooltip(Component.translatable("voxy.config.general.render_fog.tooltip"))
+                .setStorageHandler(storage)
+                .setDefaultValue(true)
+                .setBinding((v) -> VoxyConfig.CONFIG.renderVanillaFog = v, () -> VoxyConfig.CONFIG.renderVanillaFog)
+                .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+        );
+
+        fogGroup.addOption(builder.createIntegerOption(ResourceLocation.parse("voxy:sky_fog_distance"))
+                .setName(Component.literal("Sky fog distance"))
+                .setTooltip(Component.literal("Higher distance, sharper sky fog"))
+                .setStorageHandler(storage)
+                .setDefaultValue(96)
+                .setValueFormatter(v -> Component.literal(String.valueOf(v)))
+                .setRange(16, 512, 16)
+                .setBinding((v) -> VoxyConfig.CONFIG.skyFogDistance = v, () -> VoxyConfig.CONFIG.skyFogDistance)
+        );
+
+        net.caffeinemc.mods.sodium.api.config.structure.EnumOptionBuilder<SSAO.SSAOMode> ssaoBuilder = builder.createEnumOption(ResourceLocation.parse("voxy:ssao_mode"), SSAO.SSAOMode.class);
+        ssaoBuilder.setName(Component.translatable("voxy.config.general.ssao_mode"));
+        ssaoBuilder.setTooltip(Component.translatable("voxy.config.general.ssao_mode.tooltip"));
+        ssaoBuilder.setDefaultValue(SSAO.SSAOMode.AUTO);
+        ssaoBuilder.setElementNameProvider(mode -> Component.literal(mode.name()));
+        ssaoBuilder.setBinding((v) -> {
+            VoxyConfig.CONFIG.setSSAOMode(v);
+            reloadActiveRenderer();
+        }, VoxyConfig.CONFIG::getSSAOMode);
+        ssaoBuilder.setStorageHandler(storage);
+        ssaoBuilder.setImpact(OptionImpact.HIGH);
+        ssaoBuilder.setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD);
+
+        fogGroup.addOption(ssaoBuilder);
+
+        pageBuilder.addOptionGroup(fogGroup);
+        
+        var modBuilder = builder.registerModOptions("voxy", "Voxy", "1.0");
+        modBuilder.addPage(pageBuilder);
     }
 
     private static void reloadActiveRenderer() {
@@ -200,17 +223,11 @@ public abstract class VoxyConfigScreenPages {
     private static final double SUBDIV_MAX = 256;
     private static final double SUBDIV_CONST = Math.log(SUBDIV_MAX/SUBDIV_MIN)/Math.log(2);
 
-
-    //In range is 0->200
-    //Out range is 28->256
     private static float ln2subDiv(int in) {
         return (float) (SUBDIV_MIN*Math.pow(2, SUBDIV_CONST*((double)in/SUBDIV_IN_MAX)));
     }
 
-    //In range is ... any?
-    //Out range is 0->200
     private static int subDiv2ln(float in) {
         return (int) (((Math.log(((double)in)/SUBDIV_MIN)/Math.log(2))/SUBDIV_CONST)*SUBDIV_IN_MAX);
     }
-
 }

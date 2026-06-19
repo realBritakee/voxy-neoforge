@@ -114,8 +114,11 @@ public class Serialization {
             if (clzName.contains("ModMenuIntegration")) {
                 continue;//Dont want to modmenu incase it doesnt exist
             }
-            if (clzName.contains("VoxyConfigScreenPages")) {
+            if (clzName.endsWith("ModMenuIntegration")) {
                 continue;//Dont want to modmenu incase it doesnt exist
+            }
+            if (clzName.endsWith("VoxyConfigScreenPages")) {
+                continue;//Dont want to load Sodium GUI dependencies
             }
             if (clzName.endsWith("VoxyConfig")) {
                 continue;//Special case to prevent recursive loading pain
@@ -170,6 +173,10 @@ public class Serialization {
         try {
             InputStream stream = Serialization.class.getClassLoader()
                     .getResourceAsStream(pack.replaceAll("[.]", "/"));
+            if (stream == null) {
+                // Under NeoForge/Connector, the JAR-based classloader doesn't expose package directories
+                return List.of();
+            }
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             return reader.lines().flatMap(inner -> {
                 if (inner.endsWith(".class")) {

@@ -23,9 +23,6 @@
     "modmenu": [
       "me.cortex.voxy.client.config.ModMenuIntegration"
     ],
-    "sodium:config_api_user": [
-      "me.cortex.voxy.client.config.VoxyConfigMenu"
-    ],
     "main": [
       "me.cortex.voxy.commonImpl.VoxyCommon"
     ]
