@@ -45,14 +45,6 @@ This fork maintains NeoForge compatibility across multiple Minecraft versions so
 
 ---
 
-![Data Packs](https://raw.githubusercontent.com/realBritakee/mc-publish/main/images/Data%20Packs.png)
-
-No standard datapacks required. Voxy provides its own extensive client-side configuration menu to tune LOD quality, render distance, and generation speeds.
-
-📄 Full documentation: **[GUIDE.md](GUIDE.md)**
-
----
-
 ![Dependencies](https://raw.githubusercontent.com/realBritakee/mc-publish/main/images/Dependencies.png)
 
 | Type | Mod | Notes |
