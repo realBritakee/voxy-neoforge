@@ -52,7 +52,7 @@ This fork maintains NeoForge compatibility across multiple Minecraft versions so
 
 ---
 
-## ✦ DEVELOPMENT
+![Development](https://raw.githubusercontent.com/realBritakee/mc-publish/main/images/Development.png)
 
 ### Building from Source
 
