@@ -6,7 +6,7 @@
 
 <div align="center">
 
-[![Discord](https://img.shields.io/badge/DISCORD-SERVER-F16436?labelColor=2d2d2d&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/gCRv62araB) &nbsp; [![CurseForge](https://img.shields.io/badge/CURSEFORGE-PROJECTS-F16436?labelColor=2d2d2d&logo=curseforge&logoColor=white&style=flat-square)](https://www.curseforge.com/members/britakee/projects) &nbsp; [![GitHub](https://img.shields.io/badge/GITHUB-SOURCE-F16436?labelColor=2d2d2d&logo=github&logoColor=white&style=flat-square)](https://github.com/realBritakee/Workspace)
+[![Discord](https://img.shields.io/badge/DISCORD-SERVER-F16436?labelColor=2d2d2d&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/gCRv62araB) &nbsp; [![CurseForge](https://img.shields.io/badge/CURSEFORGE-PROJECT-F16436?labelColor=2d2d2d&logo=curseforge&logoColor=white&style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/voxy-neoforge-port) &nbsp; [![GitHub](https://img.shields.io/badge/GITHUB-SOURCE-F16436?labelColor=2d2d2d&logo=github&logoColor=white&style=flat-square)](https://github.com/realBritakee/Workspace)
 
 <br>
 
