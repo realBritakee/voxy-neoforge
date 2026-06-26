@@ -18,7 +18,7 @@
 
 **A high-performance Level of Detail (LoD) rendering mod allowing you to see hundreds of chunks away.**
 
-> Supports **NeoForge** | **Forge** — Minecraft **1.21.1 & 1.20.1**
+> Supports **NeoForge** | **Forge** - Minecraft **1.21.1 & 1.20.1**
 
 ---
 
@@ -32,16 +32,16 @@ This fork maintains NeoForge compatibility across multiple Minecraft versions so
 
 ![Rendering](https://raw.githubusercontent.com/realBritakee/mc-publish/main/images/Rendering.png)
 
-- **Infinite Render Distance** — See terrain and structures from 256+ chunks away.
-- **Minimal Impact** — Extremely minimal performance impact at high LoD distances.
-- **Seamless Transitions** — Smooth visual transition between full detail geometry and LoD geometry.
+- **Infinite Render Distance** - See terrain and structures from 256+ chunks away.
+- **Minimal Impact** - Extremely minimal performance impact at high LoD distances.
+- **Seamless Transitions** - Smooth visual transition between full detail geometry and LoD geometry.
 
 ---
 
 ![Features](https://raw.githubusercontent.com/realBritakee/mc-publish/main/images/Features.png)
 
-- **High Performance Engine** — Designed specifically to minimize draw calls and maximize rendering efficiency.
-- **Shader Compatibility** — Fully compatible with Iris and modern shader pipelines.
+- **High Performance Engine** - Designed specifically to minimize draw calls and maximize rendering efficiency.
+- **Shader Compatibility** - Fully compatible with Iris and modern shader pipelines.
 
 ---
 
