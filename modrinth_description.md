@@ -1,12 +1,12 @@
 # Voxy - NeoForge Port
 
-![Banner](https://raw.githubusercontent.com/realBritakee/mc-publish/main/images/Overview.png)
+![Banner](https://cdn.modrinth.com/data/PROJECTID/images/YOURIMAGE.png)
 
 ---
 
 <div align="center">
 
-[![Discord](https://img.shields.io/badge/DISCORD-SERVER-F16436?labelColor=2d2d2d&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/gCRv62araB) &nbsp; [![CurseForge](https://img.shields.io/badge/CURSEFORGE-PROJECTS-F16436?labelColor=2d2d2d&logo=curseforge&logoColor=white&style=flat-square)](https://www.curseforge.com/members/britakee/projects) &nbsp; [![Modrinth](https://img.shields.io/badge/MODRINTH-PROJECTS-00AF5C?labelColor=2d2d2d&logo=modrinth&logoColor=white&style=flat-square)](https://modrinth.com/user/britakee)
+[![Discord](https://img.shields.io/badge/DISCORD-SERVER-F16436?labelColor=2d2d2d&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/gCRv62araB) &nbsp; [![CurseForge](https://img.shields.io/badge/CURSEFORGE-PROJECTS-F16436?labelColor=2d2d2d&logo=curseforge&logoColor=white&style=flat-square)](https://www.curseforge.com/members/britakee/projects) &nbsp; [![GitHub](https://img.shields.io/badge/GITHUB-SOURCE-F16436?labelColor=2d2d2d&logo=github&logoColor=white&style=flat-square)](https://github.com/realBritakee/Workspace)
 
 <br>
 
@@ -56,23 +56,17 @@ No standard datapacks required. Voxy provides its own extensive client-side conf
 ![Dependencies](https://raw.githubusercontent.com/realBritakee/mc-publish/main/images/Dependencies.png)
 
 ### Required
-- [Voxy World Gen V2](https://modrinth.com/mod/voxy-worldgen) - Background chunk pre-generation companion mod, required for best results.
+| Mod | Version | Why |
+|-----|---------|-----|
+| [Voxy World Gen V2](https://modrinth.com/mod/voxy-worldgen) | `1.20+` | Background chunk pre-generation companion mod, required for best results. |
 
 ---
 
-## ✦ DEVELOPMENT
+![Modpacks](https://raw.githubusercontent.com/realBritakee/mc-publish/main/images/Modpacks.png)
 
-### Building from Source
+Feel free to include this mod in modpacks. **No special permission needed.**
 
-To build this mod from source, clone the repository and run the standard Gradle build command:
-
-```bash
-git clone https://github.com/realBritakee/Workspace.git
-cd CreateCities-dev/projects/Minecraft/[ModFolder]/[LoaderFolder]
-./gradlew build
-```
-
-The compiled `.jar` file will be located in the `build/libs` directory.
+A credit link back to this page is appreciated but not required.
 
 ---
 
@@ -81,5 +75,7 @@ The compiled `.jar` file will be located in the `build/libs` directory.
 The fastest way to reach me is the Discord server.
 
 - 💬 [Discord](https://discord.gg/gCRv62araB)
-- 🐛 [Issue Tracker](https://github.com/realBritakee/Workspace/issues)
+- 🐛 [GitHub / Issue Tracker](https://github.com/realBritakee/Workspace/issues)
 - ☕ [Ko-fi](https://ko-fi.com/britakeestudio)
+
+---
