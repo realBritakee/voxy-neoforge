@@ -2,7 +2,7 @@
 
 **Minecraft 1.20.1 / 1.21.1 - NeoForge / Forge**
 
-A custom NeoForge port of [Voxy](https://modrinth.com/mod/voxy) - the high-performance Level of Detail (LoD) rendering mod for Minecraft. This fork maintains NeoForge compatibility across multiple Minecraft versions.
+A custom NeoForge port of [Voxy NeoForge](https://github.com/realBritakee/voxy-neoforge) - the high-performance Level of Detail (LoD) rendering mod for Minecraft. This fork maintains NeoForge compatibility across multiple Minecraft versions.
 
 ---
 
@@ -27,7 +27,7 @@ Voxy renders distant terrain at reduced detail, allowing you to see hundreds of 
 ## Related
 
 - [Voxy World Gen V2](https://github.com/realBritakee/voxy_worldgen_v2) - background chunk pre-generation companion mod, optional for best results
-- [Official Voxy](https://modrinth.com/mod/voxy) - upstream Fabric releases for other versions
+- [Official Voxy](https://github.com/realBritakee/voxy-neoforge) - upstream Fabric releases for other versions
 
 ---
 
