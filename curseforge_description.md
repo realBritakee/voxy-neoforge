@@ -49,7 +49,7 @@ This fork maintains NeoForge compatibility across multiple Minecraft versions so
 
 | Type | Mod | Notes |
 |------|-----|-------|
-| **Required** | [Voxy World Gen V2](https://www.curseforge.com/minecraft/mc-mods/voxy-worldgen) | Background chunk pre-generation companion mod, required for best results. |
+| **Optional** | [Voxy World Gen V2](https://www.curseforge.com/minecraft/mc-mods/voxy-worldgen) | Background chunk pre-generation companion mod, optional for best results. |
 
 ---
 

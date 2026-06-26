@@ -47,8 +47,8 @@ This fork maintains NeoForge compatibility across multiple Minecraft versions so
 
 ![Dependencies](https://raw.githubusercontent.com/realBritakee/mc-publish/main/images/Dependencies.png)
 
-### Required
-- [Voxy World Gen V2](https://modrinth.com/mod/voxy-worldgen) - Background chunk pre-generation companion mod, required for best results.
+### Optional
+- [Voxy World Gen V2](https://modrinth.com/mod/voxy-worldgen) - Background chunk pre-generation companion mod, optional for best results.
 
 ---
 

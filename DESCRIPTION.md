@@ -26,7 +26,7 @@ Voxy renders distant terrain at reduced detail, allowing you to see hundreds of 
 
 ## Related
 
-- [Voxy World Gen V2](https://github.com/realBritakee/voxy_worldgen_v2) - background chunk pre-generation companion mod, required for best results
+- [Voxy World Gen V2](https://github.com/realBritakee/voxy_worldgen_v2) - background chunk pre-generation companion mod, optional for best results
 - [Official Voxy](https://modrinth.com/mod/voxy) - upstream Fabric releases for other versions
 
 ---
