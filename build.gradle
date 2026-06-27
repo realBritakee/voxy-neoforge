@@ -131,8 +131,8 @@ dependencies {
     modCompileOnly("maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric")
     modRuntimeOnlyMsk("maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric")
 
-    modCompileOnly("maven.modrinth:chunky:1.4.23-fabric")
-    modRuntimeOnlyMsk("maven.modrinth:chunky:1.4.23-fabric")
+    modCompileOnly("maven.modrinth:chunky:1.4.23-neoforge")
+    modRuntimeOnlyMsk("maven.modrinth:chunky:1.4.23-neoforge")
 
     modRuntimeOnlyMsk("maven.modrinth:spark:1.10.152-fabric")
     modRuntimeOnlyMsk("maven.modrinth:fabric-permissions-api:0.3.3")
@@ -266,3 +266,13 @@ if (!isInGHA) {
         }
     }
 }
+
+
+tasks.register('copyToUnifiedMods', Copy) {
+    def mcVersion = project.hasProperty('minecraft_version') ? project.property('minecraft_version') : "unknown"
+    from layout.buildDirectory.dir("libs")
+    into file("${project.projectDir}/../../Mods/${mcVersion}")
+    include "*.jar"
+    exclude "*-dev.jar", "*-sources.jar", "*-javadoc.jar"
+}
+tasks.build.finalizedBy('copyToUnifiedMods')
