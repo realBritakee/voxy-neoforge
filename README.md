@@ -60,7 +60,7 @@ To build this mod from source, clone the repository and run the standard Gradle 
 
 ```bash
 git clone https://github.com/realBritakee/Workspace.git
-cd voxy-neoforge
+cd CreateCities-dev/projects/Minecraft/[ModFolder]/[LoaderFolder]
 ./gradlew build
 ```
 
