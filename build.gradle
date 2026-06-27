@@ -146,8 +146,8 @@ dependencies {
     modRuntimeOnlyMsk("maven.modrinth:sodium-extra:mc1.20.1-0.5.9")
     modRuntimeOnlyMsk("net.caffeinemc:CaffeineConfig:1.3.0+1.17")
 
-    modCompileOnly("maven.modrinth:Chunky:1.3.146-fabric")
-    modRuntimeOnlyMsk("maven.modrinth:Chunky:1.3.146-fabric")
+    modCompileOnly("maven.modrinth:Chunky:1.3.146-forge")
+    modRuntimeOnlyMsk("maven.modrinth:Chunky:1.3.146-forge")
 
     // modRuntimeOnlyMsk("maven.modrinth:spark:1.10.53-fabric")
     modRuntimeOnlyMsk("maven.modrinth:fabric-permissions-api:0.3.1")
@@ -196,7 +196,7 @@ sourceSets {
 }
 
 tasks.jar {
-    archiveFileName.set("voxy-0.2.14-alpha.jar")
+    archiveFileName.set("voxy-0.2.15-alpha.jar")
 
     from("LICENSE") {
         rename { "${it}_${project.archives_base_name}"}
@@ -204,7 +204,7 @@ tasks.jar {
 }
 
 tasks.remapJar {
-    archiveFileName.set("voxy-0.2.14-Forge-1.20.1.jar")
+    archiveFileName.set("voxy-0.2.15-Forge-1.20.1.jar")
 }
 
 // java21 sourceset removed — ExpansionUtil ported to Java 17 software implementation
@@ -320,3 +320,12 @@ if (!isInGHA) {
         }
     }
 }
+
+tasks.register('copyToUnifiedMods', Copy) {
+    def mcVersion = project.hasProperty('minecraft_version') ? project.property('minecraft_version') : "unknown"
+    from layout.buildDirectory.dir("libs")
+    into file("${project.projectDir}/../../Mods/${mcVersion}")
+    include "*.jar"
+    exclude "*-dev.jar", "*-sources.jar", "*-javadoc.jar"
+}
+tasks.build.finalizedBy('copyToUnifiedMods')
