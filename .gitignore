@@ -1,15 +1,39 @@
-# Project exclude paths
-/.gradle/
-/.idea/
+# Gradle
+.gradle/
+build/
 /build/
-/run/
-/out/
-/logs/
 
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+/out/
+.vscode/
+
+# Eclipse
 bin/
 .classpath
 .project
-*.launch
 .settings/
+*.launch
 
-.vscode/
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs and runtime
+logs/
+/logs/
+run/
+/run/
+crash-reports/
+
+# Temporary / Scratch Files
+/scratch/
+/cfr_output/
+/cfr_reeses/
+cfr.jar
+*.tmp
+/*.java
